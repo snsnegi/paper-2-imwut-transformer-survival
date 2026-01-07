@@ -1,0 +1,340 @@
+% !TEX root = main.tex
+
+% BODY - edit this file to contain the WHOLE body of the paper.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction} % (fold)
+\seclabel{introduction}
+
+Just-in-time adaptive interventions (JITAI) provide the right support at the right time, usually via mobile technologies \cite{RN1}. Advances in technologies such as smartphones and wearables that can track the physiological states (e.g. heart rate) and context (e.g. location) of the user and have opened up the possibility of adapting intervention delivery to participants' current condition and emotional state. JITAIs have been employed in interventions aiming to facilitate health behavior change for a  range of applications from alcohol \cite{RN2, RN3} and smoking \cite{RN2, RN4, RN5} cessation interventions to supporting patients in the management of schizophrenia \cite{RN6} and interventions to increase physical activity \cite{RN7, RN8, RN9} and healthy eating \cite{Burke2012}. JITAIs detect states of vulnerability and deliver an intervention when the user is vulnerable to lapsing into undesired behavior. For example, an application to help the user reduce alcohol consumption might detect when the user walks into a bar and sends a notification reminding the user about their goals. 
+
+JITAIs are most effective when delivered at a moment where the user is in a state of receptivity. Receptivity can be defined as the transient ability and willingness of users to receive, process, and use support \cite{RN10}. For example, if the user is currently speaking with someone on the phone, they are unlikely to be receptive to any attempts to get them engaged in a journaling task. 
+Researchers are just beginning to examine states of receptivity in mobile health interventions as prior studies tend to focus on identifying states of vulnerability (e.g. adverse health behaviors) \cite{RN6, RN11, RN12, RN13} or evaluating the effectiveness of interventions \cite{Klasnja2019}.
+
+Previous research suggests that receptivity is influenced by several factors, including population-specific characteristics (e.g., age) \cite{Pielot2017, RN15}, intervention-specific variables (e.g., notification content) \cite{Fischer2010}, and temporal considerations (e.g., time of day) \cite{Pielot2017, Pielot2015}. However, prior work in mobile sensing has not investigated the impact of population and intervention type diversity on receptivity inference models based on smartphone sensing. Due to the high economic costs associated with conducting longitudinal passive sensing studies, most previous research has collected sensor data only from a single population and a single JITAI application over several few weeks or months. Consequently, their data analysis and models are predominantly focused on a single dataset. However, given the relatively small scale of most studies, it is essential to determine whether models trained on smaller studies can be generalized effectively and whether data can be pooled efficiently. Evaluating the model across multiple datasets and studies is specifically important for researchers to construct a practical and deployable model. As real-life deployment introduces new populations within diverse contexts, the model must demonstrate a strong ability to generalize to unseen data with robust performance. 
+
+Previous research has investigated domain generalisation in various other domains, to the best of our knowledge currently there exist no study that investigates domain generalization approaches for receptivity prediction.  Therefore, this paper aims to understand the dynamics of distribution shifts from different source-target domain pairs. In addition, this paper proposes a new robust feature engineering/modelling approach specifically developed for domain generalization for predicting receptivity to JITAIs. 
+
+Contibution 1: This paper presents 
+
+% In addition, it remains unclear whether personalized models that are adapted to each participant perform better than population-average models. Previous studies have found that features predictive for the group may not be predictive for the individual \cite{RN17}. Other attempts to build personalized models for each participant were largely inconclusive due to the studies being too short to discern if there was a significant uptrend \cite{RN8}. Furthermore, previous studies \cite{RN8} struggled with the cold-start problem of adaptive personalized models, i.e., that models do not have sufficient information to be adequately trained during the first few days, resulting in worse performance compared to population-average models \cite{RN8}. \\  
+
+
+An additional technique to address the negative impact of distribution shifts on model performance when applied to new contexts is the use of transfer learning such as domain adaptation approaches. While a small number of studies has attempted to use domain adaptation approaches for mobile sensing , to the best of our knowledge no previous studies have explored the use of domain adaptation for receptivity prediction. Therefore, a second aim of our study was to... 
+
+
+--> Ev. add something about domain adaptation/transfer learning. 
+
+\indent To address these gaps, the present study examines data collected from three studies involving different populations and interventions. The primary objective is to assess the effectiveness of receptivity inference models built on one study's data when applied to similar data collected from another study. 
+
+A secondary objective of this paper is to examine how much data provided using different data hybridization techniques  from an unseen dataset would be required to achieve comparable model performance as when training and testing on the same dataset 
+% A secondary objective of this paper is to examine if personalized models may perform better over extended time periods or for certain models or conditions. Finally, our study aimed to assess the potential of ensemble learning as a domain generalization method to address the cold-start problem observed in adaptive personalised models. 
+To the best of our knowledge, this is the first study to conduct an extensive cross-dataset evaluation analysis within the field of receptivity inference. Hence, we aim to address the following three research questions:\newline  
+\\
+
+
+\noindent \textbf{RQ1}: How does the predictive performance of machine learning models trained on intersecting features across multiple datasets compare to models trained on comprehensive feature sets within single datasets, and what implications does this have for model generalizability?
+\\ self vs intersection 
+\\ analysis for features vs datasets 
+\\ 
+\\
+\noindent \textbf{RQ2}: Is it possible to utilize the union of all available features from the different sources and the target datasets  improve model performance compared to models based on the intersection of features?
+\\ masked vs intersection vs self 
+\\ why we think this works 
+\\ 
+\noindent \textbf{RQ3}: Does using the union of all features from the source and target dataset also perform better at adaptation compared to the intersection of features modelling approach?
+\\ test @ 40percent (n percent ), conditions apply (why dataset is a bit biased)
+Concepts to exlain in intro:
+- Union of features approach
+- Intersection approach (traditional approach)
+- Domain adaptation
+- source and target dataset
+
+
+\color{blue}{@SAMARTH}\color{black} \\
+\noindent \textbf{RQ1}: How do smartphone sensing-based receptivity interference models perform on different interventions? To what extent can a model trained on a specific intervention dataset be deployed on different interventions not seen on the training data, and still maintain reasonable accuracies (intervention-agnostic generalization)?\color{blue}{this is just the vanilla results}\color{black}
+\\\textbf{RQ2}: How do different model types and train/test set data hybridization techniques affect model performance when performing cross-dataset evaluation? \\
+% How do user-specific models perform compared to population-average models?\\
+% \textbf{RQ3}: Can blended ensemble learning be employed to address the cold-start problem in adaptive personalized models?\\  
+
+
+
+This paper makes the following two important \textbf{contributions}: \\
+% contributions by investigating the research questions mentioned above:\\  
+
+\noindent \textbf{Contribution 1} \color{blue}{@SAMARTH}\color{black}: We analyzed data from over 1500 participants from three different mHealth interventions and examined the generalizability and personalization of models for receptivity inference across the three datasets. We found that models trained on Peach and OPTIMAX datasets demonstrate good generalizability with AUROC scores reaching up to 0.698 for models tested on OPTIMAX or PEACH when trained on the other models, while generalization to the Ally dataset is limited with AUROC values not exceeding 0.566 when testing on Ally. We speculate that this finding may be caused by intrinsic differences in the target population (younger age, and different incentives/different interventions)  compared to the other studies. Additionally, our study tested ensemble learning as one domain generalization method and found that with ensemble learning the performance of the built models can be increased substantially with AUROC scores reaching up to 0.737 when tested on PEACH and 0.708 when tested on OPTIMAX, respectively. \\  
+\textbf{Contribution 2} \color{blue}{@SAMARTH}\color{black}: \color{blue}{transfer learning results}
+\color{black}
+% \textbf{Contribution 3}: In our paper, we also trialed blended ensemble learning models to address the cold start problem experienced in other studies using personalized adaptive models with a small amount of initial data. Therefore, we created three different blended models that combine the predictions of the adaptive, personalized baseline, and general model to achieve better prediction accuracy. Based on our findings we saw that blended model 1 , which combined the probabilities of the adaptive and general model, yielded the best qualitative results over the whole intervention period with a mix of 80\% general and 20\% adaptive model. This finding substantiates the results from Contribution 1 and underscores the potential of ensemble learning as a domain generalization method for receptivity inference.   
+
+
+% \medskip
+% \noindent
+% In this paper, we make two important \textbf{contributions}: 
+% \begin{itemize}
+%     \item explore transferrability of 
+%     \item random guesses vs pre-initialization 
+%         essen
+% \end{itemize}
+\medskip
+\noindent
+In this paper, we make two important \textbf{contributions}: 
+\begin{itemize}
+    \item resea4rch question 1 \color{blue}{@SAMARTH}\color{black}
+    \item contribution 1 \color{blue}{@SAMARTH}\color{black}
+    \item contribution 2
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Related work}
+\seclabel{Related work}
+\subsection{State of Receptivity Detection}
+
+Prior research on receptivity and the related field of interruptibility investigated the associations between the users' contextual factors and receptivity, such as the time of the day and the day of the week \cite{Mashhadi2014, Avrahami2006, Pielot2015, Pejovic2014}, location \cite{Sarker2014, Pielot2017, Mehrotra2015}, Bluetooth connected devices \cite{Pejovic2014}, Wi-Fi connectivity \cite{Pielot2015, Pejovic2014}, communication (SMS and Call logs) \cite{Pielot2015, Fischer2011}, and phone battery status \cite{Pielot2017}. Other studies investigated activity \cite{Obuchi2016}, personality traits \cite{Mehrotra2016}, and mental states \cite{Sarker2014} as potential factors influencing receptivity.
+
+Some of the works also attempted to predict receptivity using machine learning. 
+To time notifications, Okoshi et al. developed a system to detect activity breakpoints, which reduced the user response time to a notification by up to 49\% \cite{Okoshi2017}. 
+Pielot et al. deployed a system that infers when participants are being bored in order to trigger notifications \cite{Pielot2015}. 
+The results show that the participants were more likely to engage with the delivered content when they were bored, as inferred by the model \cite{Pielot2015}. 
+Morrison et al. examined the effect on participant response to 'intelligent' notifications sent during times determined to likely receive a response by the Naive Bayes classifier that was trained over an 'initial' learning period. 
+The study found no significant difference between the intelligent and non-intelligent groups \cite{RN16}. K\"{u}nzler et al. developed prediction models that are able to detect users' receptivity in real-time using personal and contextual variables \cite{RN15}. 
+In a subsequent study, Mishra et al. employed similar models to send notifications at times when users were more likely to be receptive as inferred by the models, which resulted in a significant improvement in receptivity of over 40\text{\%} compared to messages delivered at random times \cite{RN8}. 
+
+While previous research showcases the potential of inferring receptive states using ML models based on mobile sensor data, most existing works only evaluated their models on a single dataset. There is a lack of research investigating the models' generalizability across datasets from multiple studies and interventions. We aim to address this gap. 
+
+
+\subsection{Cross-dataset Generalization}
+
+One challenging problem in various fields in mobile sensing is to build models that are able to generalize across multiple domains or datasets. Domain adaptation is a technique that aims to address this problem by adapting the model trained on a source domain using data from the target domain \cite{Wilson2022}.  However, domain adaptation requires accessibility to the target data, which may not always be the case in real-world model deployments. 
+
+In many JITAI applications, acquiring target data is challenging or may even be unknown before deploying the model. For example, in JITAI interventions where domain shifts may occur due to different participant populations and types of health interventions (e.g., depression \cite{Cuijpers2022}, physical activity promotion \cite{Kramer2020}, diet \cite{steinberg2020}, holistic approaches \cite{Castro2023}), it may not always be feasible to obtain sufficient intervention- and population-specific data in advance. 
+
+To address the problem of domain shifts without access to target data, the field of domain generalization was introduced \cite{Blanchard2011}. Domain generalization uses several methods that allow to learn models that are invariant across domains and datasets and disregard dataset-specific spurious correlations \cite{Arjovsky2019}. A recent survey summarized these methods within three groups/classes \cite{Wang2022}: 1) data manipulation, which includes data augmentation techniques like domain randomization \cite{Yue2019} and adversarial data augmentation \cite{Volpi2018}, and data generation, which generates diverse samples \cite{Zhou2020}; 2) representation learning, involving feature disentanglement, which aims to extract domain-shared and domain-specific features and domain-invariant representation learning including kernel methods \cite{li2018}, adversarial learning \cite{shao2019}, or invariant risk minimization \cite{Arjovsky2019}; and 3) learning strategy, which includes a variety of methods such as ensemble learning \cite{wu2021}, meta-learning \cite{chen2022}, gradient operation \cite{rame2022}, distributionally robust optimization \cite{sagawa2019}, and self-supervised learning \cite{kim2021}. There are several applications of domain generalization such as computer vision \cite{Yue2019, li2021, jin2020}, natural language processing \cite{zhang2009, garg2021, wang2020unseen, wang2020meta}, reinforcement learning \cite{li2018learning, zhou2021}, and medical imaging \cite{liu2020ms, liu2020shape}. Researchers have developed several domain generalization benchmarks such as Domain-Bed \cite{gulrajani2020search}, WILDS \cite{koh2021wilds},  GLOBEM \cite{xu2023globem}, and DeepDG \cite{wang2022generalizing} to facilitate machine learning studies in this area.
+
+In the mHealth domain, there are a limited number of studies investigating domain generalization of models that aim to infer participants’ state of vulnerability. For example, Xu et al. investigated cross-dataset generalizability of longitudinal behavior models for depression detection using multiple longitudinal passive mobile sensing datasets with over 500 users and found a lack of model generalizability using nine prior depression detection algorithms \cite{xu2023globem}. The study presents two new algorithms for better generalizability and finds that individual participant differences (within and between populations) are the most important aspect in the cross-dataset generalization challenge 
+\cite{xu2023globem}. The study of Meegahapola et al. aimed to assess the generalizability of mood inference models across different countries and continents \cite{meegahapola2023generalization}. The study compared country-specific, continent-specific, country-agnostic, and multi-country approaches with population-level (non-personalized) and hybrid (partially-personalized) models and found that partially personalized country-specific models performed best with area under the receiver operating characteristic curve (AUROC) scores ranging from 0.78-0.98 and 0.76-0.94 for two- and three-class models, respectively \cite{meegahapola2023generalization}. Mishra et al. (2017) examined the generalizability of three models for physiological stress detection using datasets from four studies collected from different wearable devices \cite{mishra2020evaluating}. However, to the best of our knowledge this is the first paper in the receptivity domain that investigates the generalizability of ML-models for receptivity inference. 
+Lastly, \cite{10.1371/journal.pone.0266516} explores whether models trained for predictions of mental health symptoms can be applied across different datasets, and furthermore they assessed whether combining datasets could lead to better generalizability. Their work had promising results, and is another motivator for our desire to pursue better generalizability of models across mHealth intervention data. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Dataset summary, background of studies}
+In our paper, we analyzed data from three different studies that used the MobileCoach platform for chatbot-based intervention delivery~\cite{RN18, Kowatsch2017}. The various research teams that conducted the studies very generously shared all data with us for our work. All three studies recruited participants from the German-speaking part of Switzerland and delivered the interventions in German. The studies also had a sensing module which passively recorded sensor data from the mobile phone. Sensor data was collected continuously and included: GPS location (every 10 minutes), physical activity types (every 10 minutes), date and time, battery status, lock/unlock events (iOS), screen on/off events (Android), and Wi-Fi connection state. We present a summary of the different datasets in Table 1.
+
+\subsection{ALLY}
+ALLY is a smartphone application that delivers interventions via the MobileCoach chatbot platform designed to promote physical activity by increasing the average daily step count. The participants were invited customers of a large Swiss insurance company, they had to speak German, be over 18 years old and not working night shift. The study starts with a 10-day baseline assessment phase during which step count data is collected. After the assessment phase, a six-week intervention phase followed, during which the app calculated a personalized goal using step data collected during the baseline assessment, and this goal is updated daily. The interventions were the messages from ALLY, the chatbot coach, and the participants can respond with predefined answer options. These messages were delivered to every user at random times within certain time frames. There were four different types of conversations: “(1) goal setting, which was delivered between 8-10 a.m. and set the step goals for the day, (2) self-monitoring prompt, used to inform the participants about the day's progress and encourage them to complete the goal, was delivered randomly to 50\text{\%} of the participants between 10 a.m. and 6 p.m. every day, (3) goal achievement prompt, to inform participants if they completed their goal and encourage them to complete future goals, was delivered at 8 p.m. every day, and finally (4) the weekly planning intervention, to help the participants overcome any barriers to physical activity, was randomly delivered to  50\text{\%} of the participants once a week.” \cite{RN15} Participants completing baseline and post-intervention questionnaires were reimbursed with 10 Swiss Francs. As part of the study design, participants were randomly assigned to a financial incentive, charity incentive, or a control group. The financial incentive group earned CHF 1 per day meeting their step goals, while charity participants chose too keep or donate their their rewards (up to 42 Swiss Francs), whereas the control group did not receive any incentives. The original analysis of the data included 189 participants after filtering for only the top 95 percentile response count. However, for completeness and consistency with the other data sets, we started out by including all 233 participants in this study. Seventy of the 189 were male, and the median age was 40 ± 13.7 years \cite{RN15}. 
+
+
+\subsection{OPTIMAX}
+
+OPTIMAX is a two-armed randomized waitlist-controlled trial and aims at examining the effects of psychotherapeutic interventions on the treatment of anxiety disorders. Before and after the intervention period, the smartphone application MAX was used (Reference) to measure the extent of anxiety-related symptoms using ecological momentary assessments(EMAs) for each 14 days. Participants received a 22-item survey five times a day at block-randomized intervals on the emotional states and anxiety-related symptoms within the last 30 minutes \cite{RN20}. Each survey takes about 5-10 minutes to complete. The recruitment criteria were that participants must be between 18 and 65, suffer from anxiety, have good knowledge of German, and are not currently in psychotherapy \cite{RN21}. Participants were reimbursed with 120 Swiss francs for participating in the study. 
+In this dataset, we consider an opportune moment if the participants responded to the initiating message of the conversational agent, which delivered the survey within 10 minutes of it being sent out. While Android and iOS were supported, very little iOS data (only 7 participants) was available. Hence, only the Android data was analyzed.
+
+\subsection{PEACH}
+PEACH is a smartphone application that delivers a non-clinical psychological coaching intervention over ten weeks to help individuals who are motivated to change some aspects of their personality \cite{RN22}. The Peach intervention was evaluated in a 2x2 factorial between-subject randomized, wait-list controlled trial. The recruitment criteria for this study were that participants must be above 18, able to read German, not in psychotherapeutic or psychiatric treatment, own a smartphone with a mobile internet connection, and interested in changing some aspects of their personality. The application contains a chatbot that imitates a conversation with a coach; it also offers a number of other tools such as a diary function, reminders for individual implementation and psychoeducation video clips. Study participants received a 25 Swiss Francs reimbursement for participating in the pre-test and follow-up assessment. In addition, participants could earn up to 1000 credits through various activities during the intervention, achieving bronze, silver, or gold, status with chances to win case prizes of 100, 200 and 300 Swiss Franks in a lottery. A subset of the study's participants had a mean age of 25.66 years and 53.8\text{\%} female \cite{RN23}.
+
+All participants in the experimental condition and in the wait-list condition received during one week before and during one week after the intervention an EMA at random times within four predefined time windows per day: 9.30 a. m. - 11.30 a. m., 12.30 p. m. - 14.30 p. m., 15.30 p. m. - 17.30 p.m., and 18.30 p. m. - 20.30 p. m. A just-in-time response was defined as a response to the initiating message of the conversational agent within 10 minutes upon sending.
+
+\begin{table}[h]
+\begin{tabular}{l|lll}
+\hline
+Dataset           & No. of participants & No. of days in study & Application purpose         \\ \hline
+PEACH - Android   & 676                 & 1-159 (mean: 42)     & Change personality          \\
+OPTIMAX - Android & 110                 & 1-16 (mean: 10)      & Survey anxiety level        \\
+ALLY - Android    & 69                  & 1-51 (mean: 40)      & Encourage physical activity \\
+PEACH - iOS       & 603                 & 1-137 (mean: 43)     & Change personality          \\
+ALLY - iOS        & 164                 & 1-51 (mean: 39)      & Encourage physical activity \\ 
+\hline
+\end{tabular}
+  \caption{Summary of datasets.}
+  \label{tab:freq}
+\end{table}
+
+\section{Method}
+\subsection{Data Processing}
+All interventions were built using the MobileCoach a platform, designed to resemble a human-chatbot interaction. The initial message sent by the chatbot is delivered as a notification to the user's screen. We consider this message as the 'initiating message'. If a user is able to reply to this message within 10 minutes, we consider this as an opportune moment, which is consistent with the definitions in prior work \cite{RN15,RN8}. If a user takes longer than 10 minutes to reply, we label the time point when the initiating message was sent as an inopportune moment. However, if a user replied after 10 minutes or more, we labeled the time of the response as an opportune moment. This definition of receptivity was made to be consistent across the different datasets. 
+
+Each type of data, including Wi-Fi availability, location, battery level, and others, was individually joined to the record of messages based on the participant identifier and timestamp. To put a time limit on how far back from each message the sensor readings could be taken, we decided to associate the message sending event with data recorded up to 2 days prior. This extended time frame was chosen because certain features only got updated in the sensor readings when they changed, such as physical activity, proximity, and Bluetooth. Rows without mobile data were excluded from the analysis. 
+
+Given the rapid changes in physical activity sensor data readings, which were recorded as percentage confidences for each of the five/six different activities: 'STILL','ON\_FOOT', 'RUNNING', 'IN\_VEHICLE', 'ON\_BICYCLE', 'UNKNOWN', we decided to first, for each time-stamp, retrieve the activity with the highest confidence. Then, to get the definitive activity label for each message, we calculated the activity label that occurs most often in the previous 2 minutes from that message. Similarly, for the phone screen status, we calculated the average of duration during which the phone screen was on the last 2 minutes before the most recent reading.
+
+In the event of missing data, they are dropped, with the exception of 'screen\_num\_on\_found\_5\_min' and 'screen\_num\_off\_found\_5\_min', which are engineered features and are filled with 0s. This results in a lot of data dropping, and a reduction in the number of viable participants and their data. A summary of how many participants with viable data remain are included in Table 2. 
+
+\begin{table}[h]
+\begin{tabular}{l|ll}
+\hline
+Dataset & No. participants \\  \hline
+ PEACH-android  & 356\\
+OPTIMAX-android  & 67\\
+ALLY-android  & 26   \\
+PEACH-iOS  & 344 \\
+ALLY-iOS  &  \\
+\hline\hline
+\end{tabular}
+  \caption{Summary of datasets and their number of participants.}
+  \label{tab:freq}
+\end{table}
+
+The distribution of labels (receptive vs non-receptive) for each dataset are given in Table 3. 
+
+\begin{table}[h]
+\begin{tabular}{l|lll}
+\hline
+Dataset & No. of receptive moments & No. of non-receptive moments\\  \hline
+ PEACH-android  & 14201 & 5512\\
+OPTIMAX-android  &  1737 &  2183 \\
+ALLY-android  & 705  & 637  \\
+PEACH-iOS  &  9413 & 5779 \\
+ALLY-iOS  & &  \\
+\hline\hline
+\end{tabular}
+  \caption{Summary of datasets and their labels.}
+  \label{tab:freq}
+\end{table}
+
+And example data processing flow for ALLY is shown in Figure~\ref{fig:data-flow-ally}. A similar pathway is taken for the other datasets, OPTIMAX and PEACH as well.  
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.7\linewidth]{figs/ally-data-flow.png}
+  \caption{Data processing flow for ALLY.}
+    \label{fig:data-flow-ally}
+
+\end{figure} 
+
+\subsection{Feature Engineering}
+Besides the data captured by the sensing module, we created several additional features - location type, the number of times the phone was unlocked and the number of times the phone was locked in the last 5 minutes from each initiating message, and the time elapsed in seconds from the last screen unlocking event to the message.  
+To obtain the location type, we used the DBSCAN algorithm to cluster the GPS locations captured \cite{RN24} and categorize them into home, work, transit, and other. We removed points that are not at least accurate up to 100m, and only considered clusters with at least 20 points. We set the maximum distance between two points for one to be considered as in the neighborhood of the other as 100m. We labeled the most frequent location cluster between 10 pm and 6 am every night as home. The most frequent cluster occurring from 10 am to 4 pm every weekday that is not home was labeled as work. All remaining clusters were labeled other while unclustered points were labeled transit.
+
+Regarding the number of times the phone was locked and unlocked in the last 5 minutes, the two features were calculated by summing up the locking and unlocking events in the 5 minutes prior to each initiating message timestamp, starting from the first time-stamp. NaN values were recorded as 0. 
+
+For the light brightness, we also calculated the average light brightness value from the 4 hours prior to each message. This resulted in the light brightness avg from 4h feature. 
+
+Lastly, to calculate the time elapsed from the last screen unlocking and locking event to each message, for each message we found the first unlock and lock event prior to that message,  subtracted the times, and recorded that value in seconds (int).  
+
+For machine learning compatibility, we also converted each message (target)'s timestamp into 3 values: hour (0-23), day of the week (0-6), and the day of that participant's participation in the study (1: first day, 2: second day and so on). 
+
+Furthermore, for each feature, we calculated and included a 'time\_found' feature, which illustrates how much further back in time (in ms) the sensor reading was found. They are all capped at 2 days, however this feature introduces a temporal element to our data that we found to be helpful with our results.  
+
+\subsection{List of features}
+Table~\ref{tab:summary-features} summarizes the full list of features including both engineered features and data directly connected from the phone sensing module that were present in all of the datasets. This is a superset, and for each training and testing pair of datasets, we report the subset of features used in that experiment. Furthermore, we did not particularly perform feature selection but instead tried to use all the data available to us.
+
+\begin{table}[h]
+  \begin{tabular}{ll}
+    \hline
+    \textbf{Feature name} & \textbf{Description} \\
+    \hline
+    1) screen lock &	whether screen is locked, 1 is locked 0 is unlocked \\
+    2) screen unlock & whether screen is unlocked, 1 is unlocked 0 is locked \\
+    3) num off last 5 & number of times the screen was off in the last 5 minutes \\ 
+    4) num on last 5 & number of times the screen was on in the last 5 minutes \\ 
+    5) last unlock to target & time (in seconds) between the last unlocking event and the message \\ 
+    6) battery left & how much battery is left (current battery level) \\
+    7) battery full &	whether the battery is currently full, 1 if full 0 if not \\
+    8) battery discharging &	whether the battery is discharging/ battery level is falling, 1 if discharging, 0 if not \\
+    9) battery charging &	whether the battery is currently charging \\
+    10) on bicycle &	whether the phone owner is on a bicycle speed, 1 if so 0 if not  \\
+    11) on foot &	whether the phone owner is on foot,  1 if so 0 if not\\
+    12) running & whether the phone owner is running,  1 if so 0 if not\\
+    13) in vehicle & whether the phone owner is in a vehicle , 1 if so 0 if not\\
+    14) still &	whether the phone is still, 1 if so 0 if not \\
+    15) tilting * & whether the phone is tilted and how much \\
+    16) shaking ** & whether the phone is shaking and how much\\
+    17) Wi-Fi unavailable &	whether Wi-Fi connection is available/ unavailable, 1 if so 0 if not \\
+    18) home &	is the phone at location identified as home, 1 if so 0 if not\\
+    19) work &	is the phone at location identified as work, 1 if so 0 if not\\
+    20) transit & is the phone at a location identified as transit,  1 if so 0 if not \\
+    21) unknown &	is the phone location unknown, 1 if so 0 if not \\
+    22) Other &	is the phone in a location identified as other, 1 if so 0 if not\\
+    23) hour &	hour of the day (0-23) \\
+    24) day &	day of the week (0-6, 0 being Monday) \\
+    25) day of study & the day of the participants participating in the study (1: first day, 2: second day, ...) \\
+    26) light brightness & brightness of phone screen \\
+    27) screen found on \\
+    28) last lock to target & time (in seconds) between the last locking  event and the message \\ 
+    29) light brightness average from 4 hours & average brightness from last 4 hours \\
+    30) unknown activity & whether the activity of user is unknown \\ 
+    31) maxrange \\ 
+    32) battery voltage \\
+    33) battery temperature \\
+    34) number of wifi devices \\
+    35) number of bluetooth devices \\
+    \hline
+\end{tabular}
+  \caption{Table of feature names and descriptions. *indicates presence only in android, ** indicates presence only in iOS. Comparable features, so taken to be similar.}
+  \label{tab:summary-features}
+\end{table}
+
+\begin{table}[h]
+  \begin{tabular}{ll}
+    \hline
+    \textbf{Train/test pair \color{blue}{@SAMARTH CHECK THIS}}\color{black} & \textbf{Features} \\
+    \hline
+    Peach iOS/Peach iOS & 14, 2, 24, 28, 25, 5, 6, 16, 4, 10, 12, battery from found 10 mins drain ??,  \\ &23, 3, 1, 26, 13, 29, 11
+     \\ 
+     Peach Android/Peach iOS  & battery from found 10 mins drain, 23, 24, 2, 25, 28,3,1, 5, 26, 6,29,4 \\
+     Peach Android/Peach Android & 2, 24,30, 31, 12, 5, 28, 32, 6, 4, 14, 29, 33, 7, 34, 10, 25, 11, 16, \\ &proximity found distance , 17, battery from found 10 min drain, \\ & 35, 31, 8, 23, 9, 4, 15, 1, 26, 29, 13 \\ 
+     Peach iOS/Ally Android & battery from found 10 min drain, 23, 24, 2,25, 24, 28, 4, 1, 6, 5, 3 \\
+     Optimax Android/Peach iOS & battery from found 10 min drain, 23, 24, 2, 25, 28, 1, 5, 26, 6, 29, 4\\
+     Optimax Android/Peach Android & 2, 24, 30, 31, 12, 28, 32 \\
+    \hline
+\end{tabular}
+  \caption{Table of features used for each experiment. The numbers refer to indices in Table 4.}
+  \label{tab:summary-features}
+\end{table}
+
+\subsection{Models}
+Given the differences in data collected from iOS and Android devices, we built separate models for them \cite{RN15}. Furthermore, we examined the performance for models trained on one dataset and tested on another, within and across platforms. We also experimented with giving various ways and amounts of test dataset data as part of the training set, to improve generalizability. We examined five machine learning approaches: 1) Gradient Boosted Trees, 2) Random Forest 3) a Neural Net (MLP) 4) SVM and 5) KNN. For all five, we conducted grid search with several different parameters to find the best ones, which are recorded here. Only the MLP and gradient boosted trees were used for transfer learning. MLPs had two varieties which we considered, MLP1 and MLP2, and we examined the area under the receiver operating curve (AUROC) to characterize how well each model performed when evaluated with different test sets. 
+
+\subsubsection{Gradient Boost Decision Trees}
+Boosted tree algorithms are relatively fast to train and have been shown to outperform other approaches such as deep learning and simple linear models in supervised learning tasks for a number of tabular data sets \cite{RN24}. We used the scikit-learn implementation with parameters n\_estimators=50, learning\_rate=0.1, max\_depth=5, random\_state=42. All other parameters were left as their default settings.
+
+\subsubsection{Random Forest}
+Due to success with AUROC and efficiency, we chose a Random Forest classifier with n-estimators equal to 100 to train and test our data. 
+
+\subsubsection{SVM}\color{blue}{@SAMARTH}\color{black} 
+\subsubsection{KNN}\color{blue}{@SAMARTH}\color{black} 
+
+\subsubsection{Neural Net}
+Neural networks can learn nonlinear features and are also adaptable to reinforcement learning approaches on a continuous state space (such as the continuous range of battery level, screen brightness, etc.). However, they are slow to train and require a large volume of training data. For our neural network, we experimented with an MLP auto encoder(insert architecture), and used various train/test data hybridization techniques to perform transfer learning between datasets of different features and sizes. The parameters of the neural network were: {\color{blue}\textbf{insert}}, and our hybridization techniques are explained in the section below. 
+
+% \begin{figure}[h]
+%   \centering
+%   \includegraphics[width=0.5\linewidth]{fig11}
+%   \caption{Neural network model architecture.}
+%     \label{fig:neuralnet-architecture}
+% \end{figure}
+
+\subsection{Self techniques}
+For training and testing on the same dataset, we used leave one subject out (LOSO) evaluation, where one subject in the dataset was held as the test set, and the rest were concatenated and used as training set. Prior to training, we also performed feature scaling for numeric (not one hot) features for both train and test by normalizing so that the mean is zero and standard deviation is one. This evaluation gave us results listed in Tables 6,7and 8.    
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results} % (fold)
+\seclabel{results}
+
+Compare and contrast this paper's work with important papers from the literature.
+Always use a tilde (non-breaking space) before the `cite' command~\cite{lamport:latex94}, to avoid unfortunate line breaks.
+Use our `bibtex' annotation when you can't remember the cite key, or still need to find a reference~\bibtex{fubar}.
+Later replace it with the `cite' command once you have the right cite key.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion} 
+\seclabel{discussion}
+
+\seclabel{limitations}
+- We can only say that our models work for our operationalization of receptivity. May not necessarily work for other ways to measure receptivity. 
+- 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion} 
+\seclabel{conclusion}
+
+Alternately, this section may be titled `Summary', if its primary content is to summarize the paper. 
+\hey{Strictly speaking, a `Conclusion' section should only state conclusions.}
+Sometimes this section may also contain suggestions for Future Work.

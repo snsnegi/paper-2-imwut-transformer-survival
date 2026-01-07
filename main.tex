@@ -1,0 +1,152 @@
+% Top-level LaTeX file - UbiWell template.
+% Author: David Kotz
+% Modified by: Varun Mishra
+
+% Delete the variants for formats you are not using.
+
+%%%%%%%%%%%%%%%% README %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%--------------- simple ----------------------------------------------------
+% The 'simple' approach is the default for this template.  It uses LaTeX
+% standard 'article' format, with 1" margins, times font, numbered
+% pages.
+
+%--------------- ACM -------------------------------------------------------
+% ACM papers must follow the official ACM template:
+%   https://www.acm.org/publications/proceedings-template
+% unless the conference or journal specifies something else.
+% Verify that your LaTeX installation uses recent acmart.cls.
+% Read ACM instructions for particularities of their style.
+% There are MANY details you should incorporate; this template is minimal.
+
+%--------------- IEEE ------------------------------------------------------
+% IEEE conference papers must follow the official IEEE conference template:
+%   https://www.ieee.org/conferences/publishing/templates.html
+% IEEE journal papers must follow the official IEEE journal template:
+%   https://journals.ieeeauthorcenter.ieee.org/create-your-ieee-journal-article/authoring-tools-and-templates/ieee-article-templates/templates-for-transactions/
+% Verify that your LaTeX installation uses recent IEEEtran.cls.
+% Read IEEE instructions for particularities of their style.
+% There are MANY details you should incorporate; this template is minimal.
+%===========================================================================
+
+%%%%%%%%%%%%%%%% anonymization %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Choose whether to run in 'anonymized' mode, by which is set last.
+\newif\ifanonymized
+\anonymizedfalse    % do not anonymize authors
+\anonymizedtrue     % anonymize authors
+
+% EXAMPLE: how to hide a System name when anonymized
+%\ifanonymized
+%    % anonymized system name
+%    \newcommand{\sysname}{Foobar\xspace}
+%\else
+%    % actual system name
+%    \newcommand{\sysname}{Xena\xspace}
+%\fi
+
+
+%%%%%%%%%%%%%%%% draft/submit mode %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Default to run in 'draft' mode 
+\newif\ifsubmit
+\submitfalse	% Default to 'draft' mode
+% \submittrue	% Uncomment this line to use 'submit' mode instead
+
+
+%%%%%%%%%%%%%%%% documentclass %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Choose a document class, and parameters, according to the desired format.
+% %--------------- simple ----------------------------------------------------
+% \documentclass[11pt]{article}
+%    \usepackage[text={6.5in,9in},centering]{geometry}
+%    \usepackage{times}
+%    \pagestyle{plain}
+
+%--------------- ACM -------------------------------------------------------
+\documentclass[acmlarge]{acmart}
+%   add ,screen for journals that are never printed, e.g., PACM and IMWUT
+%   add ,anonymous for double-blind submissions
+%   add ,timestamp to include a time stamp in the footer of each page.
+% Be sure to read the ACM documentation for proper parameter selection.
+
+%--------------- IEEE ------------------------------------------------------
+% IEEE journal:
+% \documentclass[journal]{IEEEtran}
+%  add 10pt,compsoc for computer-society journals
+% IEEE conference:
+% \documentclass[conference]{IEEEtran}
+
+%===========================================================================
+
+
+% UbiWell standard packages and preamble definitions
+\input{preamble}
+
+
+%%%%%%%%%%%%%%%% document %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\title{Cross-Dataset Generalization of Mobile Sensing-Based Receptivity
+Inference Models: Analysis of Three Different Mobile Health
+Interventions}
+\date{}
+
+
+%%%%%%%%%%%%%%%% authors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Describe the authors, according to the desired format.
+%--------------- simple ----------------------------------------------------
+\ifanonymized
+    \author{Anonymized for blind submission}
+\else
+    \author{Theodore Seuss Geisel}
+\fi
+%--------------- ACM -------------------------------------------------------
+% Read the ACM documentation carefully; this template is minimal.
+%\ifanonymized
+%    \author{Anonymized for blind submission}
+%\else
+%    \author{Theodore Seuss Geisel}
+%    \affiliation{
+%     \institution{Dartmouth College}
+%     \streetaddress{9~Cemetery Lane}
+%     \city{Hanover}
+%     \state{NH}
+%     \country{USA}}
+%\fi
+%--------------- IEEE ------------------------------------------------------
+% Read the IEEE documentation carefully; this template is minimal.
+%\ifanonymized
+%    \author{Anonymized for blind submission}
+%\else
+%    \author{Theodore~Seuss~Geisel,~\IEEEmembership{Member,~IEEE}\IEEEcompsocitemizethanks{\IEEEcompsocthanksitem Dr.~Seuss is with the Department of Creative Writing, Dartmouth College, Hanover, NH, USA.}}
+%\fi
+%===========================================================================
+
+
+
+
+
+%%%%%%%%%%%%%%%% text of the paper %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{abstract}		% edit this file
+\maketitle  % In ACM style, this must be moved *after* the abstract.
+\input{headings}	% do not edit
+\input{body}		% edit this file
+\input{ack}			% edit this during camera-ready
+
+
+%%%%%%%%%%%%%%%% bib style %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Choose the bibliography style, according to the desired format. ACM bib style is already available directly on overleaf. You might have to download others based on the template specifications. You can find some customized ones for IEEE in the bibs folder.
+
+%--------------- simple ----------------------------------------------------
+\bibliographystyle{plain}	% standard built-in bibtex - replace with the following line
+% \bibliographystyle{bibs/plainDOI}
+%--------------- ACM -------------------------------------------------------
+%\bibliographystyle{ACM-Reference-Format}
+%--------------- IEEE ------------------------------------------------------
+%\bibliographystyle{bibs/IEEEtran-DOI}
+%===========================================================================
+
+
+%%%%%%%%%%%%%%%% bibliography %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Add other bibtex files, e.g., ,bib/project-interest ,bib/project
+\bibliography{bibs/local}
+
+\end{document}
