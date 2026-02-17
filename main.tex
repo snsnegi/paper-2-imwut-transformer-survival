@@ -48,7 +48,7 @@
 % Default to run in 'draft' mode 
 \newif\ifsubmit
 \submitfalse	% Default to 'draft' mode
-% \submittrue	% Uncomment this line to use 'submit' mode instead
+\submittrue	% Uncomment this line to use 'submit' mode instead
 
 
 %%%%%%%%%%%%%%%% documentclass %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -60,7 +60,7 @@
 %    \pagestyle{plain}
 
 %--------------- ACM -------------------------------------------------------
-\documentclass[acmlarge]{acmart}
+\documentclass[manuscript,anonymous, review, acmlarge]{acmart}
 %   add ,screen for journals that are never printed, e.g., PACM and IMWUT
 %   add ,anonymous for double-blind submissions
 %   add ,timestamp to include a time stamp in the footer of each page.
@@ -83,9 +83,7 @@
 %%%%%%%%%%%%%%%% document %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 
-\title{Cross-Dataset Generalization of Mobile Sensing-Based Receptivity
-Inference Models: Analysis of Three Different Mobile Health
-Interventions}
+\title{Beyond the Binary: Operationalizing Receptivity to Digital Health Interventions as a Time-to-Event Spectrum }
 \date{}
 
 
@@ -136,10 +134,10 @@ Interventions}
 % Choose the bibliography style, according to the desired format. ACM bib style is already available directly on overleaf. You might have to download others based on the template specifications. You can find some customized ones for IEEE in the bibs folder.
 
 %--------------- simple ----------------------------------------------------
-\bibliographystyle{plain}	% standard built-in bibtex - replace with the following line
+% \bibliographystyle{plain}	% standard built-in bibtex - replace with the following line
 % \bibliographystyle{bibs/plainDOI}
 %--------------- ACM -------------------------------------------------------
-%\bibliographystyle{ACM-Reference-Format}
+\bibliographystyle{ACM-Reference-Format}
 %--------------- IEEE ------------------------------------------------------
 %\bibliographystyle{bibs/IEEEtran-DOI}
 %===========================================================================
@@ -150,3 +148,7 @@ Interventions}
 \bibliography{bibs/local}
 
 \end{document}
+
+
+- 
+- Sunday same time 

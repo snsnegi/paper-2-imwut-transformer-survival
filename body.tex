@@ -6,335 +6,417 @@
 \section{Introduction} % (fold)
 \seclabel{introduction}
 
-Just-in-time adaptive interventions (JITAI) provide the right support at the right time, usually via mobile technologies \cite{RN1}. Advances in technologies such as smartphones and wearables that can track the physiological states (e.g. heart rate) and context (e.g. location) of the user and have opened up the possibility of adapting intervention delivery to participants' current condition and emotional state. JITAIs have been employed in interventions aiming to facilitate health behavior change for a  range of applications from alcohol \cite{RN2, RN3} and smoking \cite{RN2, RN4, RN5} cessation interventions to supporting patients in the management of schizophrenia \cite{RN6} and interventions to increase physical activity \cite{RN7, RN8, RN9} and healthy eating \cite{Burke2012}. JITAIs detect states of vulnerability and deliver an intervention when the user is vulnerable to lapsing into undesired behavior. For example, an application to help the user reduce alcohol consumption might detect when the user walks into a bar and sends a notification reminding the user about their goals. 
 
-JITAIs are most effective when delivered at a moment where the user is in a state of receptivity. Receptivity can be defined as the transient ability and willingness of users to receive, process, and use support \cite{RN10}. For example, if the user is currently speaking with someone on the phone, they are unlikely to be receptive to any attempts to get them engaged in a journaling task. 
-Researchers are just beginning to examine states of receptivity in mobile health interventions as prior studies tend to focus on identifying states of vulnerability (e.g. adverse health behaviors) \cite{RN6, RN11, RN12, RN13} or evaluating the effectiveness of interventions \cite{Klasnja2019}.
+Just-In-Time Adaptive Interventions (JITAIs) aim to deliver support that is temporally precise and contextually relevant \cite{RN1,hsu_personalized_2025}. JITAI frameworks are grounded in the idea that timing is identified through `states of vulnerability and opportunity'; they aim to provide support at moments of need (e.g., low self-regulation) or opportunity (e.g., a moment to act positively in line with goals) \cite{hsu_personalized_2025,perski_technologymediated_2022}. However, even when a state of need is correctly identified, the intervention may fail if delivered when the user is unable to attend to it, potentially causing frustration or burden\cite{keller_receptivity_2023}. To ensure support is delivered when it can be used, researchers are actively testing the dimension of receptivity, defined as the transient state of a user's ability and willingness to receive, process, and use support~\cite{RN10}. Determining exactly how to measure this capacity remains a complex challenge\cite{sahu_real-world_2025,king_investigating_2024}. Receptivity is currently treated as a binary outcome (receptive/not receptive), despite being theoretically established as a continuous construct governed by context and intervention burden.
 
-Previous research suggests that receptivity is influenced by several factors, including population-specific characteristics (e.g., age) \cite{Pielot2017, RN15}, intervention-specific variables (e.g., notification content) \cite{Fischer2010}, and temporal considerations (e.g., time of day) \cite{Pielot2017, Pielot2015}. However, prior work in mobile sensing has not investigated the impact of population and intervention type diversity on receptivity inference models based on smartphone sensing. Due to the high economic costs associated with conducting longitudinal passive sensing studies, most previous research has collected sensor data only from a single population and a single JITAI application over several few weeks or months. Consequently, their data analysis and models are predominantly focused on a single dataset. However, given the relatively small scale of most studies, it is essential to determine whether models trained on smaller studies can be generalized effectively and whether data can be pooled efficiently. Evaluating the model across multiple datasets and studies is specifically important for researchers to construct a practical and deployable model. As real-life deployment introduces new populations within diverse contexts, the model must demonstrate a strong ability to generalize to unseen data with robust performance. 
+Advances in mobile sensing and wearable technology have opened up the possibility of adapting intervention delivery to a user’s changing internal state and external context\cite{wang_just---moment_2020, Teepe2021}. By continuously tracking physiological and behavioral markers, these technologies enable JITAIs to potentially detect the precise moments when a user is most able to engage with support\cite{mishra_detecting_2021}. Yet, a critical disconnect remains between the richness of this sensing data and the coarseness of current modeling. In practice, receptivity is operationalized through a fixed time-window threshold: a user is labeled `receptive' (y=1) only if they interact with a prompt within a specific duration (e.g., 10 minutes) and `non-receptive' (y=0) otherwise\cite{mishra_detecting_2021, king_investigating_2024}. While this abstraction was instrumental in establishing that mobile sensing could predict response probabilities better than chance, it inherently flattens the rich temporal dynamics of the user's context. By enforcing a rigid cutoff, binary models artificially conflate slightly delayed responses with total non-engagement, creating a `noisy negative' target that obscures the nuance between immediate interruptibility and deferred availability. To better align measurement with the theoretical definition of receptivity as a continuous spectrum, we propose a time-to-event framework. Unlike binary classifiers that force a decision based on an arbitrary timeout, a time-to-event model predicts the distribution of likely response times, allowing JITAIs to optimize for the user's transient ability to receive, process, and use support.
 
-Previous research has investigated domain generalisation in various other domains, to the best of our knowledge currently there exist no study that investigates domain generalization approaches for receptivity prediction.  Therefore, this paper aims to understand the dynamics of distribution shifts from different source-target domain pairs. In addition, this paper proposes a new robust feature engineering/modelling approach specifically developed for domain generalization for predicting receptivity to JITAIs. 
+% BELOW EXAMPLE RELEVANT OR NOT
+% Consider a presenter experiencing a heart rate spike mid-speech, they have a high need for stress regulation (vulnerability) but lack the cognitive opportunity to stop speaking and perform a breathing exercise. In a scenario where they finish speaking and engage with the stress-reduction prompt after 12 minutes, under the standard binary paradigm ($<10$ min), this valid instance of deferred availability is labeled identically to a user who actively ignored the intervention ($y=0$). This operational rigidity effectively penalizes the user for necessary contextual prioritization. In contrast, a time-to-event framework shifts this decision landscape by predicting a continuous probability distribution rather than a flat rejection. Such a model can discern that while availability is unlikely at $t=0$, it may peak significantly at $t+15$ minutes. This approach closes the gap to conceptual receptivity by exposing temporal engagement patterns that are currently invisible, ultimately allowing JITAIs to intelligently defer engagement to the moment of highest utility rather than discarding the opportunity due to an arbitrary timeout.
 
-Contibution 1: This paper presents 
+% ON TRANSFORMERS AND INTRODUCING PATCHTST 
+Deep sequence models have revolutionized temporal modeling in various mobile sensing domains, ranging from Human Activity Recognition\cite{ek_transformer-based_2023,durmaz_incel_-device_2023} to disease progression monitoring\cite{wang_personalized_2022}, their application to behavioral outcomes, including detecting receptivity, remains largely underexplored. Current JITAI systems predominantly rely on static decision rules or basic classifiers\cite{van_genugten_beyond_2025}, failing to capture the long-term fine-grained dependencies inherent in physiological and behavioral markers. This represents a significant gap, as recent Transformer architectures like PatchTST \cite{nie_time_2023} are uniquely suited to address the specific challenges of mobile sensing, such as sensor noise and unavailability\cite{ahmad_enhanced_2024, gao_ultra-short-term_2024}. By processing sensor channels independently, these models prevent noise from unstable sensors (e.g., GPS drift) from corrupting the representations of robust signals, establishing a resilient backbone for encoding high-dimensional, multivariate temporal context.
 
-% In addition, it remains unclear whether personalized models that are adapted to each participant perform better than population-average models. Previous studies have found that features predictive for the group may not be predictive for the individual \cite{RN17}. Other attempts to build personalized models for each participant were largely inconclusive due to the studies being too short to discern if there was a significant uptrend \cite{RN8}. Furthermore, previous studies \cite{RN8} struggled with the cold-start problem of adaptive personalized models, i.e., that models do not have sufficient information to be adequately trained during the first few days, resulting in worse performance compared to population-average models \cite{RN8}. \\  
+% ON SURVIVAL AND INTRODUCING DEEPHIT 
+To operationalize this for JITAIs, we couple this encoder with a deep survival analysis decoder. Prior research in large-scale notification management has demonstrated that survival analysis provides a superior fit for engagement modeling by explicitly accounting for the `right-censored' nature of user interaction, where a non-response is treated as a delay rather than a rejection \cite{yuan_state_2019, yang_deeppvisit_2023}. Building on this, we adopt a DeepHit-style \cite{lee_deephit_2018, lee_dynamic-deephit_2020} objective to estimate the full probability mass function (PMF) of response times. This approach avoids the rigid assumptions regarding the relationship between covariates and risk inherent in parametric models (e.g., Weibull), instead learning the joint distribution directly which has been in the past shown to effectively capture complex, non-linear dependencies. \cite{lee_deephit_2018}.
 
+Guided by this architecture, this granular estimation of the survival distribution allows us to operationalize receptivity as a continuous, dynamic state rather than a static label. To validate the utility of this approach in real-world mHealth deployments, we target the following research questions: 
 
-An additional technique to address the negative impact of distribution shifts on model performance when applied to new contexts is the use of transfer learning such as domain adaptation approaches. While a small number of studies has attempted to use domain adaptation approaches for mobile sensing , to the best of our knowledge no previous studies have explored the use of domain adaptation for receptivity prediction. Therefore, a second aim of our study was to... 
-
-
---> Ev. add something about domain adaptation/transfer learning. 
-
-\indent To address these gaps, the present study examines data collected from three studies involving different populations and interventions. The primary objective is to assess the effectiveness of receptivity inference models built on one study's data when applied to similar data collected from another study. 
-
-A secondary objective of this paper is to examine how much data provided using different data hybridization techniques  from an unseen dataset would be required to achieve comparable model performance as when training and testing on the same dataset 
-% A secondary objective of this paper is to examine if personalized models may perform better over extended time periods or for certain models or conditions. Finally, our study aimed to assess the potential of ensemble learning as a domain generalization method to address the cold-start problem observed in adaptive personalised models. 
-To the best of our knowledge, this is the first study to conduct an extensive cross-dataset evaluation analysis within the field of receptivity inference. Hence, we aim to address the following three research questions:\newline  
-\\
-
-
-\noindent \textbf{RQ1}: How does the predictive performance of machine learning models trained on intersecting features across multiple datasets compare to models trained on comprehensive feature sets within single datasets, and what implications does this have for model generalizability?
-\\ self vs intersection 
-\\ analysis for features vs datasets 
-\\ 
-\\
-\noindent \textbf{RQ2}: Is it possible to utilize the union of all available features from the different sources and the target datasets  improve model performance compared to models based on the intersection of features?
-\\ masked vs intersection vs self 
-\\ why we think this works 
-\\ 
-\noindent \textbf{RQ3}: Does using the union of all features from the source and target dataset also perform better at adaptation compared to the intersection of features modelling approach?
-\\ test @ 40percent (n percent ), conditions apply (why dataset is a bit biased)
-Concepts to exlain in intro:
-- Union of features approach
-- Intersection approach (traditional approach)
-- Domain adaptation
-- source and target dataset
-
-
-\color{blue}{@SAMARTH}\color{black} \\
-\noindent \textbf{RQ1}: How do smartphone sensing-based receptivity interference models perform on different interventions? To what extent can a model trained on a specific intervention dataset be deployed on different interventions not seen on the training data, and still maintain reasonable accuracies (intervention-agnostic generalization)?\color{blue}{this is just the vanilla results}\color{black}
-\\\textbf{RQ2}: How do different model types and train/test set data hybridization techniques affect model performance when performing cross-dataset evaluation? \\
-% How do user-specific models perform compared to population-average models?\\
-% \textbf{RQ3}: Can blended ensemble learning be employed to address the cold-start problem in adaptive personalized models?\\  
-
-
-
-This paper makes the following two important \textbf{contributions}: \\
-% contributions by investigating the research questions mentioned above:\\  
-
-\noindent \textbf{Contribution 1} \color{blue}{@SAMARTH}\color{black}: We analyzed data from over 1500 participants from three different mHealth interventions and examined the generalizability and personalization of models for receptivity inference across the three datasets. We found that models trained on Peach and OPTIMAX datasets demonstrate good generalizability with AUROC scores reaching up to 0.698 for models tested on OPTIMAX or PEACH when trained on the other models, while generalization to the Ally dataset is limited with AUROC values not exceeding 0.566 when testing on Ally. We speculate that this finding may be caused by intrinsic differences in the target population (younger age, and different incentives/different interventions)  compared to the other studies. Additionally, our study tested ensemble learning as one domain generalization method and found that with ensemble learning the performance of the built models can be increased substantially with AUROC scores reaching up to 0.737 when tested on PEACH and 0.708 when tested on OPTIMAX, respectively. \\  
-\textbf{Contribution 2} \color{blue}{@SAMARTH}\color{black}: \color{blue}{transfer learning results}
-\color{black}
-% \textbf{Contribution 3}: In our paper, we also trialed blended ensemble learning models to address the cold start problem experienced in other studies using personalized adaptive models with a small amount of initial data. Therefore, we created three different blended models that combine the predictions of the adaptive, personalized baseline, and general model to achieve better prediction accuracy. Based on our findings we saw that blended model 1 , which combined the probabilities of the adaptive and general model, yielded the best qualitative results over the whole intervention period with a mix of 80\% general and 20\% adaptive model. This finding substantiates the results from Contribution 1 and underscores the potential of ensemble learning as a domain generalization method for receptivity inference.   
-
-
-% \medskip
-% \noindent
-% In this paper, we make two important \textbf{contributions}: 
-% \begin{itemize}
-%     \item explore transferrability of 
-%     \item random guesses vs pre-initialization 
-%         essen
-% \end{itemize}
-\medskip
-\noindent
-In this paper, we make two important \textbf{contributions}: 
 \begin{itemize}
-    \item resea4rch question 1 \color{blue}{@SAMARTH}\color{black}
-    \item contribution 1 \color{blue}{@SAMARTH}\color{black}
-    \item contribution 2
+    \item \textbf{RQ1: Feasibility of Continuous Receptivity Architectures.} 
+    Is it feasible to model receptivity as a probabilistic time-to-event distribution using high-dimensional, multivariate mobile sensing data? We investigate the architectural coupling of Channel-Independent Transformers (PatchTST) with survival analysis to capture the nuances of user receptivity.
+    
+    \item \textbf{RQ2: Robustness and Stability.} 
+    Does the proposed continuous-time framework offer a stable and robust alternative to current binary operationalizations? We examine whether this approach can consistently achieve actionable performance metrics, particularly in scenarios where traditional fixed-window models exhibit high variance or fail to generalize.
+    
+    \item \textbf{RQ3: Strategies for Data Efficiency.} 
+    To what extent can self-supervised learning strategies leverage unlabeled sensor traces to mitigate the `cold-start' problem? We explore whether pre-training via Masked Patch Reconstruction on auxiliary datasets allows the model to learn transferable behavioral representations, thereby accelerating convergence and reducing the dependency on scarce labeled interaction data.
 \end{itemize}
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Related work}
-\seclabel{Related work}
+\section{Background and Related work}
+\seclabel{BGRW}
+
 \subsection{State of Receptivity Detection}
+Early research characterized receptivity as a function of contextual metadata, identifying strong associations with temporal patterns \cite{Mashhadi2014, Avrahami2006, Pielot2015, Pejovic2014}, location and connectivity \cite{Sarker2014, Pielot2017, Mehrotra2015, Pejovic2014}, as well as device status and communication logs \cite{Pielot2017, Fischer2011}. These foundational studies extended to inferential traits, linking receptivity to physical activity \cite{Obuchi2016}, personality \cite{Mehrotra2016}, and mental states \cite{Sarker2014}.
 
-Prior research on receptivity and the related field of interruptibility investigated the associations between the users' contextual factors and receptivity, such as the time of the day and the day of the week \cite{Mashhadi2014, Avrahami2006, Pielot2015, Pejovic2014}, location \cite{Sarker2014, Pielot2017, Mehrotra2015}, Bluetooth connected devices \cite{Pejovic2014}, Wi-Fi connectivity \cite{Pielot2015, Pejovic2014}, communication (SMS and Call logs) \cite{Pielot2015, Fischer2011}, and phone battery status \cite{Pielot2017}. Other studies investigated activity \cite{Obuchi2016}, personality traits \cite{Mehrotra2016}, and mental states \cite{Sarker2014} as potential factors influencing receptivity.
+Building on these associations, the field has advanced toward real-time predictive modeling. Approaches focusing on cognitive breakpoints \cite{Okoshi2017} and inferred states of boredom \cite{Pielot2015} demonstrated that timing notifications to natural breaks could significantly reduce response latency. While initial deployments utilizing simple classifiers (e.g., Naive Bayes) yielded mixed results regarding user engagement \cite{RN16}, subsequent iterations have proven more robust. Notably, work by Kunzler et al. \cite{RN15} and Mishra et al. \cite{RN8} established that context-aware delivery can improve receptivity rates by over 40\% compared to random timing, validating the utility of machine learning in dynamic intervention scheduling.
 
-Some of the works also attempted to predict receptivity using machine learning. 
-To time notifications, Okoshi et al. developed a system to detect activity breakpoints, which reduced the user response time to a notification by up to 49\% \cite{Okoshi2017}. 
-Pielot et al. deployed a system that infers when participants are being bored in order to trigger notifications \cite{Pielot2015}. 
-The results show that the participants were more likely to engage with the delivered content when they were bored, as inferred by the model \cite{Pielot2015}. 
-Morrison et al. examined the effect on participant response to 'intelligent' notifications sent during times determined to likely receive a response by the Naive Bayes classifier that was trained over an 'initial' learning period. 
-The study found no significant difference between the intelligent and non-intelligent groups \cite{RN16}. K\"{u}nzler et al. developed prediction models that are able to detect users' receptivity in real-time using personal and contextual variables \cite{RN15}. 
-In a subsequent study, Mishra et al. employed similar models to send notifications at times when users were more likely to be receptive as inferred by the models, which resulted in a significant improvement in receptivity of over 40\text{\%} compared to messages delivered at random times \cite{RN8}. 
+As predictive capabilities mature, recent works have expanded to scrutinize the systemic implications of automated triggering. King et al. demonstrated that optimizing for receptivity effectively alters the sampling mechanism itself, introducing potential downstream biases in the collected data \cite{king_investigating_2024}. Concurrently, Sahu et al. have moved toward a more granular taxonomy, separating the initial \textit{acceptance} of a prompt from the situational \textit{feasibility} of completion \cite{sahu_real-world_2025}. These findings suggest a critical maturation in the field, where, rather than merely predicting engagement, researchers are now 'debugging' the intervention loop, striving to uncover the latent behavioral dynamics that drive these complex interactions.
 
-While previous research showcases the potential of inferring receptive states using ML models based on mobile sensor data, most existing works only evaluated their models on a single dataset. There is a lack of research investigating the models' generalizability across datasets from multiple studies and interventions. We aim to address this gap. 
+\subsection{Limitations of Binary Operationalization in Receptivity Modeling}
+\seclabel{binary_limitations}
+The theoretical definition of receptivity emphasizes a nuanced and context-aware state of willingness \cite{Nahum-Shani2018}, the prevailing operationalization in mobile health (mHealth) is based heavily on binary classifications. Standard practice designates a user as ``receptive'' ($y=1$) if they respond to a JITAI within a fixed time window, most commonly 10 minutes and ``non-receptive'' ($y=0$) otherwise \cite{king_investigating_2024,mishra_detecting_2021}. We contend, however, that this binary perspective overlooks the nuanced temporal dynamics of receptivity, reducing a continuous range of engagement to a simple either-or categorization that may constrain the accuracy of mHealth interventions.
 
+Reliance on a fixed threshold introduces methodological challenges, mainly because the duration lacks unique predictive validity. Evidence from the literature demonstrates that while models trained on 10-minute windows outperform random baselines, so do models trained on 1-minute or 5-minute windows \cite{mishra_detecting_2021}. Consequently, the selection of the window often involves balancing theoretical intent with practical constraints. To combat the severe class imbalance inherent in the sparse mHealth data, researchers often expand the receptivity window to capture more positive instances (pseudolabeling), effectively adjusting the ground truth to accommodate data sparsity \cite{king_investigating_2024}. This flexibility leads to varying optimization targets: a model trained on a narrow window ($<$ 5 minutes) optimizes for ``impulse'' engagement, detecting immediate interruptibility, whereas a wide window ($>$ 60 minutes) optimizes for ``deferred'' planning. By standardizing on a middle ground, the community risks optimizing for a compromise that serves neither urgent context-aware prompts nor high-burden therapeutic interventions effectively.
 
-\subsection{Cross-dataset Generalization}
+Furthermore, the binary label creates a ``noisy negative'' by aggregating distinct behavioral states. In a binary framework, a non-response ($y=0$) does not distinguish between \textit{non-perception} (e.g., the user is physically incapacitated or separated from the device), \textit{active rejection} (the user perceives but dismisses the prompt), and \textit{delayed receptivity} (the user responds after the cutoff). For example, a user responding at 10 minutes and 30 seconds exhibits a fundamentally different cognitive state than one who never engages, yet binary classifiers treat these as identical negative instances. This over-simplification obscures the mechanism of action, making it difficult for models to learn the nuances between immediate interruptibility and delayed availability.
 
-One challenging problem in various fields in mobile sensing is to build models that are able to generalize across multiple domains or datasets. Domain adaptation is a technique that aims to address this problem by adapting the model trained on a source domain using data from the target domain \cite{Wilson2022}.  However, domain adaptation requires accessibility to the target data, which may not always be the case in real-world model deployments. 
+Finally, this rigid temporal operationalization renders the relationship between intervention complexity and response latency opaque. While the field increasingly recognizes the importance of the \textit{Burden of Treatment} \cite{cross_digital_2024}, a fixed window prevents the analysis of whether high-burden tasks naturally require longer receptivity horizons than low-burden micro-interactions. By treating all non-responses within the fixed window as uniform failures, the current paradigm structurally excludes the concept of ``deferred availability.'' To advance the field, we propose moving beyond these static thresholds toward a framework that models receptivity as a continuous time-to-event probability distribution. This shift provides the necessary observational resolution to eventually study these dynamics, preserving the fidelity of the urgency signal that binary labels discard.
 
-In many JITAI applications, acquiring target data is challenging or may even be unknown before deploying the model. For example, in JITAI interventions where domain shifts may occur due to different participant populations and types of health interventions (e.g., depression \cite{Cuijpers2022}, physical activity promotion \cite{Kramer2020}, diet \cite{steinberg2020}, holistic approaches \cite{Castro2023}), it may not always be feasible to obtain sufficient intervention- and population-specific data in advance. 
+\subsection{Survival Analysis in HCI/mHealth}
+Survival analysis, historically rooted in medical and epidemiological research, encompasses a set of statistical approaches for analyzing the expected duration of time until one or more events of interest occur, such as the onset of a disease or mechanical failure \cite{yuan_state_2019}. Unlike standard regression or classification tasks that predict a snapshot value or label, survival analysis models the underlying probability distribution of the time-to-event. 
 
-To address the problem of domain shifts without access to target data, the field of domain generalization was introduced \cite{Blanchard2011}. Domain generalization uses several methods that allow to learn models that are invariant across domains and datasets and disregard dataset-specific spurious correlations \cite{Arjovsky2019}. A recent survey summarized these methods within three groups/classes \cite{Wang2022}: 1) data manipulation, which includes data augmentation techniques like domain randomization \cite{Yue2019} and adversarial data augmentation \cite{Volpi2018}, and data generation, which generates diverse samples \cite{Zhou2020}; 2) representation learning, involving feature disentanglement, which aims to extract domain-shared and domain-specific features and domain-invariant representation learning including kernel methods \cite{li2018}, adversarial learning \cite{shao2019}, or invariant risk minimization \cite{Arjovsky2019}; and 3) learning strategy, which includes a variety of methods such as ensemble learning \cite{wu2021}, meta-learning \cite{chen2022}, gradient operation \cite{rame2022}, distributionally robust optimization \cite{sagawa2019}, and self-supervised learning \cite{kim2021}. There are several applications of domain generalization such as computer vision \cite{Yue2019, li2021, jin2020}, natural language processing \cite{zhang2009, garg2021, wang2020unseen, wang2020meta}, reinforcement learning \cite{li2018learning, zhou2021}, and medical imaging \cite{liu2020ms, liu2020shape}. Researchers have developed several domain generalization benchmarks such as Domain-Bed \cite{gulrajani2020search}, WILDS \cite{koh2021wilds},  GLOBEM \cite{xu2023globem}, and DeepDG \cite{wang2022generalizing} to facilitate machine learning studies in this area.
+A defining characteristic of this domain is its ability to handle \textit{censoring}, a phenomenon in which the event of interest is not observed for some subjects within the study window. Survival time generally consists of two components: a beginning point and an endpoint \cite{yuan_state_2019}. However, if the event does not occur by the end of the follow-up time, the observation is considered censored. These data points are not ``missing'' in the traditional sense; they carry valuable information that indicates that the subject ``survived'' (did not experience the event) for at least time $t$. Standard machine learning approaches that drop these instances introduce significant bias \cite{buckley_linear_1979, james_consistency_1984}, whereas survival objectives explicitly account for them by maximizing the probability of survival beyond the censoring time.
 
-In the mHealth domain, there are a limited number of studies investigating domain generalization of models that aim to infer participants’ state of vulnerability. For example, Xu et al. investigated cross-dataset generalizability of longitudinal behavior models for depression detection using multiple longitudinal passive mobile sensing datasets with over 500 users and found a lack of model generalizability using nine prior depression detection algorithms \cite{xu2023globem}. The study presents two new algorithms for better generalizability and finds that individual participant differences (within and between populations) are the most important aspect in the cross-dataset generalization challenge 
-\cite{xu2023globem}. The study of Meegahapola et al. aimed to assess the generalizability of mood inference models across different countries and continents \cite{meegahapola2023generalization}. The study compared country-specific, continent-specific, country-agnostic, and multi-country approaches with population-level (non-personalized) and hybrid (partially-personalized) models and found that partially personalized country-specific models performed best with area under the receiver operating characteristic curve (AUROC) scores ranging from 0.78-0.98 and 0.76-0.94 for two- and three-class models, respectively \cite{meegahapola2023generalization}. Mishra et al. (2017) examined the generalizability of three models for physiological stress detection using datasets from four studies collected from different wearable devices \cite{mishra2020evaluating}. However, to the best of our knowledge this is the first paper in the receptivity domain that investigates the generalizability of ML-models for receptivity inference. 
-Lastly, \cite{10.1371/journal.pone.0266516} explores whether models trained for predictions of mental health symptoms can be applied across different datasets, and furthermore they assessed whether combining datasets could lead to better generalizability. Their work had promising results, and is another motivator for our desire to pursue better generalizability of models across mHealth intervention data. 
+While traditionally applied to biological lifespans, survival analysis has seen increasing utility in modeling social behavior and human-computer interaction. It has been successfully employed to predict dwell time on web services and model information cascades in social networks \cite{yuan_state_2019,liu_understanding_2010, yu_temporally_2017}. More recently, this approach has been adapted for mobile notification management. Previous works have utilized survival analysis to model the time-to-visit (opening an app) after a notification. For example, Yuan et al. introduced the use of Accelerated Failure-Time (AFT) models assuming a Weibull distribution to predict user engagement \cite{yuan_state_2019}. Similarly, Yang et al. extended this via deep learning to optimize notification delivery times \cite{yang_deeppvisit_2023}. These works demonstrate that modeling the \textit{time} until interaction offers a more granular understanding of user behavior than binary engagement metrics alone.
 
+We propose that survival analysis offers an alternative framework that better aligns with theoretical conceptualizations of receptivity \cite{Nahum-Shani2018}. By modeling the probability density function rather than a static cutoff, this approach addresses the structural limitations identified in Section 2.2. It preserves temporal granularity, distinguishing between immediate ``impulse'' engagement and deferred responses without enforcing a compromise threshold. Furthermore, it mitigates the issue of ``noisy negatives'' by formalizing non-responses as right-censored data, ensuring that unobserved interactions are treated as information that the response time exceeds the observation window, rather than as definitive rejections.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Dataset summary, background of studies}
-In our paper, we analyzed data from three different studies that used the MobileCoach platform for chatbot-based intervention delivery~\cite{RN18, Kowatsch2017}. The various research teams that conducted the studies very generously shared all data with us for our work. All three studies recruited participants from the German-speaking part of Switzerland and delivered the interventions in German. The studies also had a sensing module which passively recorded sensor data from the mobile phone. Sensor data was collected continuously and included: GPS location (every 10 minutes), physical activity types (every 10 minutes), date and time, battery status, lock/unlock events (iOS), screen on/off events (Android), and Wi-Fi connection state. We present a summary of the different datasets in Table 1.
+\subsection{Deep Learning Approaches to Time-to-Event Analysis}
 
-\subsection{ALLY}
-ALLY is a smartphone application that delivers interventions via the MobileCoach chatbot platform designed to promote physical activity by increasing the average daily step count. The participants were invited customers of a large Swiss insurance company, they had to speak German, be over 18 years old and not working night shift. The study starts with a 10-day baseline assessment phase during which step count data is collected. After the assessment phase, a six-week intervention phase followed, during which the app calculated a personalized goal using step data collected during the baseline assessment, and this goal is updated daily. The interventions were the messages from ALLY, the chatbot coach, and the participants can respond with predefined answer options. These messages were delivered to every user at random times within certain time frames. There were four different types of conversations: “(1) goal setting, which was delivered between 8-10 a.m. and set the step goals for the day, (2) self-monitoring prompt, used to inform the participants about the day's progress and encourage them to complete the goal, was delivered randomly to 50\text{\%} of the participants between 10 a.m. and 6 p.m. every day, (3) goal achievement prompt, to inform participants if they completed their goal and encourage them to complete future goals, was delivered at 8 p.m. every day, and finally (4) the weekly planning intervention, to help the participants overcome any barriers to physical activity, was randomly delivered to  50\text{\%} of the participants once a week.” \cite{RN15} Participants completing baseline and post-intervention questionnaires were reimbursed with 10 Swiss Francs. As part of the study design, participants were randomly assigned to a financial incentive, charity incentive, or a control group. The financial incentive group earned CHF 1 per day meeting their step goals, while charity participants chose too keep or donate their their rewards (up to 42 Swiss Francs), whereas the control group did not receive any incentives. The original analysis of the data included 189 participants after filtering for only the top 95 percentile response count. However, for completeness and consistency with the other data sets, we started out by including all 233 participants in this study. Seventy of the 189 were male, and the median age was 40 ± 13.7 years \cite{RN15}. 
+While traditional statistical methods like the Cox Proportional Hazards model have laid the groundwork for survival analysis, they are strictly limited by linearity assumptions and struggle to model the complex, time-varying dependencies inherent in high-dimensional mobile sensing data. To address this, deep learning architectures evolved from simple Multi-Layer Perceptrons to dynamic frameworks like \textbf{DeepHit} \cite{lee_deephit_2018}, which utilizes a multi-task network to learn the joint distribution of survival times and competing events directly, extending to longitudinal settings via Recurrent Neural Networks (RNNs) \cite{lee_dynamic-deephit_2020}. However, while RNNs and LSTMs have historically been the standard for sequential sensing tasks, they face significant bottlenecks in capturing long-range dependencies over the extended historical windows necessary to model human routine. Consequently, the field is shifting toward Transformer architectures (e.g., SurvFormer \cite{li_survformer_2025}), which utilize self-attention to process sequences in parallel; yet, applying standard Transformers to physiological time-series remains computationally expensive and semantically weak due to point-wise attention. Recent advancements such as the \textbf{PatchTST} \cite{nie_time_2023} architecture resolve these constraints by segmenting time-series into sub-series 'patches'. This patching design allows the model to attend to much longer historical contexts along with perserving the local semantic integrity of physical sensor data while enforcing channel independence to prevent noise propagation between heterogeneous sensors.
+
+\subsection{Summary: Bridging the Gap}
+
+Current approaches to receptivity modeling are constrained by two fundamental limitations: the structural simplification of receptivity into a binary classification problem and the inability of existing architectures to efficiently model long-term behavioral dependencies. First, as detailed in Section 2.2, binary labels create 'noisy negatives' by aggregating distinct states such as physical incapacitation versus active rejection—into a single non-receptive class, thereby obscuring the true mechanisms of user availability. Second, while deep learning has improved predictive power, standard architectures struggle to leverage the vast amounts of unlabeled sensor data available in mHealth. The PRISM framework addresses these gaps by operationalizing receptivity as a continuous \textbf{time-to-event probability distribution}, distinguishing between immediate and deferred availability. By integrating a \textbf{PatchTST} backbone with a \textbf{DeepHit} survival decoder, PRISM captures long-range temporal dependencies while preventing noise propagation via channel independence. Furthermore, PRISM employs a \textbf{Self-Supervised Learning (SSL)} strategy via masked patch reconstruction, allowing the model to learn robust behavioral representations from unlabeled data, significantly mitigating the 'cold-start' problem inherent to personalized intervention systems.
 
 
-\subsection{OPTIMAX}
 
-OPTIMAX is a two-armed randomized waitlist-controlled trial and aims at examining the effects of psychotherapeutic interventions on the treatment of anxiety disorders. Before and after the intervention period, the smartphone application MAX was used (Reference) to measure the extent of anxiety-related symptoms using ecological momentary assessments(EMAs) for each 14 days. Participants received a 22-item survey five times a day at block-randomized intervals on the emotional states and anxiety-related symptoms within the last 30 minutes \cite{RN20}. Each survey takes about 5-10 minutes to complete. The recruitment criteria were that participants must be between 18 and 65, suffer from anxiety, have good knowledge of German, and are not currently in psychotherapy \cite{RN21}. Participants were reimbursed with 120 Swiss francs for participating in the study. 
-In this dataset, we consider an opportune moment if the participants responded to the initiating message of the conversational agent, which delivered the survey within 10 minutes of it being sent out. While Android and iOS were supported, very little iOS data (only 7 participants) was available. Hence, only the Android data was analyzed.
+\section{The PRISM Framework}
+\seclabel{framework}
 
-\subsection{PEACH}
-PEACH is a smartphone application that delivers a non-clinical psychological coaching intervention over ten weeks to help individuals who are motivated to change some aspects of their personality \cite{RN22}. The Peach intervention was evaluated in a 2x2 factorial between-subject randomized, wait-list controlled trial. The recruitment criteria for this study were that participants must be above 18, able to read German, not in psychotherapeutic or psychiatric treatment, own a smartphone with a mobile internet connection, and interested in changing some aspects of their personality. The application contains a chatbot that imitates a conversation with a coach; it also offers a number of other tools such as a diary function, reminders for individual implementation and psychoeducation video clips. Study participants received a 25 Swiss Francs reimbursement for participating in the pre-test and follow-up assessment. In addition, participants could earn up to 1000 credits through various activities during the intervention, achieving bronze, silver, or gold, status with chances to win case prizes of 100, 200 and 300 Swiss Franks in a lottery. A subset of the study's participants had a mean age of 25.66 years and 53.8\text{\%} female \cite{RN23}.
+In this section we introduce \texttt{PRISM}, a framework designed to model receptivity as a time-to-event probability distribution. PRISM comprises three components: (1) a channel-independent transformer backbone, (2) a probabilistic survival decoder, and (3) a two-stage optimization strategy employing self-supervised learning.
 
-All participants in the experimental condition and in the wait-list condition received during one week before and during one week after the intervention an EMA at random times within four predefined time windows per day: 9.30 a. m. - 11.30 a. m., 12.30 p. m. - 14.30 p. m., 15.30 p. m. - 17.30 p.m., and 18.30 p. m. - 20.30 p. m. A just-in-time response was defined as a response to the initiating message of the conversational agent within 10 minutes upon sending.
+\subsection{Context Encoding via Self-Supervised Transformers}
+\seclabel{context_encoding}
 
-\begin{table}[h]
-\begin{tabular}{l|lll}
-\hline
-Dataset           & No. of participants & No. of days in study & Application purpose         \\ \hline
-PEACH - Android   & 676                 & 1-159 (mean: 42)     & Change personality          \\
-OPTIMAX - Android & 110                 & 1-16 (mean: 10)      & Survey anxiety level        \\
-ALLY - Android    & 69                  & 1-51 (mean: 40)      & Encourage physical activity \\
-PEACH - iOS       & 603                 & 1-137 (mean: 43)     & Change personality          \\
-ALLY - iOS        & 164                 & 1-51 (mean: 39)      & Encourage physical activity \\ 
-\hline
+PRISM encodes longitudinal behavioral patterns from noisy, unlabeled data using a Channel-Independent PatchTST encoder \cite{nie_time_2023}. We selected this architecture to address the non-stationarity and computational constraints inherent in mobile sensing data.
+
+\subsubsection{Reversible Instance Normalization (RevIN)}
+Longitudinal user data often exhibits significant distribution shifts over time (e.g., activity levels changing seasonally). To mitigate this non-stationarity, we employ Reversible Instance Normalization (RevIN) \cite{kim_reversible_2022}. Prior to encoding, we normalize each instance $\mathbf{x}^{(i)}$ by calculating its mean $\mu_i$ and standard deviation $\sigma_i$:
+
+\begin{equation}
+    \hat{\mathbf{x}}^{(i)} = \gamma \left( \frac{\mathbf{x}^{(i)} - \mu_i}{\sigma_i + \epsilon} \right) + \beta
+\end{equation}
+
+\noindent where $\gamma$ and $\beta$ are learnable affine parameters. This normalization stabilizes the distribution for the encoder, and the inverse operation is applied later to restore the original scale for valid reconstruction loss calculation.
+
+\subsubsection{Channel-Independent Patching for Robustness and Efficiency}
+To process long history windows efficiently, we employ a patching operation $\mathcal{P}$. Given a univariate sensor stream $\mathbf{x}^{(i)}$ of length $L$, we unfold it into a sequence of $N$ patches with length $P$ and stride $S$:
+
+\begin{equation}
+    \mathbf{x}_p^{(i)} = \text{Unfold}(\mathbf{x}^{(i)}) \in \mathbb{R}^{P \times N}, \quad \text{where } N = \left\lfloor \frac{L-P}{S} \right\rfloor + 2
+\end{equation}
+
+This transformation reduces the memory complexity of the attention mechanism from $O(L^2)$ to $O(N^2) \approx O((L/S)^2)$, enabling PRISM to efficiently process extended historical windows (e.g., 14 days). Capturing long-range dependencies are highly applicable in the mHealth to model multi-scale temporal dynamics, such as circadian rhythms and weekly behavioral motifs, which are often lost in shorter context windows.
+
+Furthermore, mobile sensing data is inherently heterogeneous; a `bursty' event-based signal (e.g., Screen Unlocks) has a different statistical profile than a continuous state signal (e.g., Battery Level). Standard transformers that mix channels risk allowing high-frequency noise from unstable sensors to corrupt the representations of stable ones. To mitigate this, PRISM enforces \textit{Channel Independence} (CI). Each sensor stream is embedded and processed by the transformer backbone in isolation, sharing weights to learn universal temporal patterns while preventing noise propagation across modalities \cite{nie_time_2023}. In this architecture, patching serves a dual purpose: it acts as a local filter to smooth out sensor jitter, and it quadratically reduces computational complexity, enabling the model to learn representations from high-resolution data without the memory bottleneck of point-wise attention.
+
+\subsection{Probabilistic Receptivity Inference}
+\seclabel{inference}
+
+We frame receptivity as a discrete-time survival analysis problem. The model estimates the probability mass function (PMF) of the "time-to-response" over $K$ discretized time bins.
+
+To balance calibration (accurate probability estimates) with discrimination (correct ranking of risks), we adapt the DeepHit objective \cite{lee_deephit_2018}. However, the standard ranking loss in DeepHit is prone to gradient explosion during early training dynamics. We introduce a numerical stability control, defining the PRISM objective as:
+
+\begin{equation}
+ \mathcal{L}_{\text{PRISM}} = \mathcal{L}_{\text{NLL}} + \beta \sum_{i \neq j} A_{ij} \cdot \eta(\hat{F}_i, \hat{F}_j)
+\end{equation}
+
+\noindent Here, $\mathcal{L}_{\text{NLL}}$ is the negative log-likelihood of the joint distribution of the first hitting time and event. The second term is a ranking loss weighted by $\beta$. The indicator matrix $A_{ij} = \mathbb{I}(y_i = 1, t_i < t_j)$ identifies valid pairs for comparison within the training batch. Intuitively, if instance $i$ is observed to respond at time $t_i$ and instance $j$ responds later (or hasn't responded yet) at $t_j$, the model should assign a higher cumulative probability of response to $i$ than to $j$ at time $t_i$. This loss does not compare ``responders'' vs. ``non-responders'' as binary classes; rather, it exploits the relative temporal ordering (deltas) between instances to refine the shape of the predicted survival curves, ensuring the model correctly differentiates between immediate and delayed engagement.
+
+The term $\eta(\cdot)$ represents our "Safe" ranking penalty. We modify the standard exponential penalty with a clamping operation $\mathcal{C}$ to prevent divergence:
+
+\begin{equation}
+ \eta(u, v) = \exp\left(\mathcal{C}\left(\frac{-(u - v)}{\sigma}, \text{max}=10.0\right)\right)
+\end{equation}
+
+\noindent where $\hat{F}$ is the estimated cumulative distribution function and $\sigma$ controls the steepness of the penalty. This modification ensures the model navigates the initial optimization landscape without collapsing.
+
+\subsection{Training Process}
+\seclabel{training}
+
+Our training pipeline consists of two phases designed to leverage unlabelled data while preventing catastrophic forgetting during fine-tuning.
+
+\subsubsection{Phase 1: Self-Supervised Pre-training}
+We first train the backbone on a corpus of unlabelled sensor data using Masked Patch Modeling. We randomly mask part of the input patches and minimize the Mean Squared Error (MSE) of the reconstruction. This forces the model to learn the latent `grammar' of human routine independent of receptivity labels.
+
+\subsubsection{Phase 2: Discriminative Fine-Tuning}
+We subsequently attach the survival decoder and fine-tune the model. To preserve the temporal features learned during pre-training, we employ Layer-wise Learning Rate Decay (LLRD) \cite{kumar_fine-tuning_2022}. The learning rate $\eta_l$ for layer $l$ is defined as:
+
+\begin{equation}
+    \eta_l = \eta_{\text{head}} \cdot \lambda^{D - l}
+\end{equation}
+
+\noindent where $\eta_{\text{head}}$ is the learning rate for the survival head, $D$ is the network depth, and $\lambda < 1$ is the decay factor. This differential optimization acts as a ``gradient damper'' for the lower layers, ensuring the backbone retains its generalizability while the head rapidly adapts to the receptivity task.
+
+
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figs/img-figureModelV4.png}
+    \caption{\textbf{The \texttt{PRISM} Framework.} The architecture utilizes a two-stage training protocol. \textbf{Phase 1 (Left):} The model engages in Self-Supervised Learning on unlabeled sensor data, optimizing a reconstruction objective (MSE) to learn temporal dependencies via random masking. \textbf{Phase 2 (Right):} The pre-trained backbone weights are transferred to the downstream task. A DeepHit Survival Head is attached to predict receptivity, and the network is fine-tuned using Layer-wise Learning Rate Decay (LLRD) to preserve the feature representations learned in Phase 1.}
+    \label{fig:system_pipeline}
+\end{figure*}
+
+
+\section{Dataset}
+\label{sec:dataset}
+
+\subsection{Dataset Used}
+The data utilized in this work originate from three distinct deployment phases of `LvL UP', a smartphone-based holistic lifestyle coaching intervention developed to improve health behaviors and mental well-being \cite{Castro2023}. The intervention integrates automated conversational agent–led health coaching sessions with complementary self-regulatory tools (activity tracker, food diary, journal, and slow-paced breathing) \cite{shih_breeze_2019}. All three studies were conducted in Singapore. We thank the authors of the Lvl UP trials to make their data available to us for this analysis. 
+
+To capture the context of user engagement, the application includes an integrated passive sensing module that runs continuously in the background. While the module collects a broad spectrum of physiological and behavioral signals, we specifically use the subset of features available on Android devices for this analysis. The complete list of extracted features is detailed in Table \ref{tab:feature_summary}.
+
+To address the scarcity of labeled receptivity data, we adopt a split-source strategy. We aggregate the longitudinal sensor streams from the two preliminary studies (Feasibility and Pilot) to form a large-scale unlabeled corpus for self-supervised pre-training to learn robust representations of habitual behavior. Data from the Main Trial is reserved exclusively for supervised fine-tuning and evaluation, providing the ground-truth receptivity labels required for the downstream survival analysis task. The specific characteristics of the three deployment cohorts are as follows:
+
+\begin{itemize}
+    \item \textbf{LvL UP Feasibility Study \cite{mair_feasibility_2025}:} A 21-day `in-the-wild' trial with Singaporean adults ($n=99$) to assess the technical feasibility, app engagement, and user satisfaction of the intervention.
+    \item \textbf{LvL UP Pilot Trial \cite{zheng_1_nodate}:} An 8-week Sequential, Multiple Assignment, Randomized Controlled (SMART) pilot study ($n=123$) aimed to evaluate the feasibility and preliminary efficacy of the intervention in adults at risk of developing non-communicable diseases or common mental disorders.
+    \item \textbf{LvL UP Main Trial \cite{castro_lvl_2025}:} A 12-month Sequential, Multiple Assignment, Randomized Controlled (SMART) study ($n=678$) aimed to evaluate the effectiveness of the intervention in adults at risk of developing non-communicable diseases or common mental health disorders.
+\end{itemize}
+
+
+\subsection{Intervention Protocol and Sampling Strategy:}
+Our analysis uses an app use reminder notification, which was delivered by the LvL UP app daily at 09:00 local time. This prompt serves as a consistent behavioral anchor, encouraging users to engage with the application's lifestyle coaching tools.
+
+While receptivity research often relies on random time-stratified sampling (e.g., Experience Sampling) to capture temporal dynamics, this intervention adheres to a fixed daily schedule. We intentionally adopt this design to control for circadian and time-of-day effects, thereby isolating day-to-day variation in contextual receptivity. This controlled setting provides a conservative and internally valid testbed for evaluating our central contribution: operationalizing receptivity as a continuous time-to-event process rather than a fixed-window binary outcome.
+Under this protocol, variability in response latency arises primarily from changing environmental and behavioral contexts (e.g., location, recent activity, sleep history), rather than from differences in delivery time. Consequently, the model must learn to infer receptivity from sensed context rather than relying on simple temporal heuristics. We define our target variable as the latency between this 09:00 h prompt and the user's subsequent interaction with the app.
+To ensure a clean signal, we excluded days where participants received additional, non-routine notifications (e.g., ad-hoc reminders) to eliminate confounding effects. Despite the fixed delivery time, the longitudinal nature of the Main Trial provides substantial within-user and between-user variation in context and engagement patterns, enabling us to examine how receptivity evolves over time
+
+
+\subsection{Feature Extraction and Processing}
+\label{sec:processing}
+We processed the raw Android sensor streams into a unified time-series dataset with a 1-minute resolution. As mobile sensing data is inherently sparse and event-driven (recording values only upon state changes), we aligned all sensors to a continuous temporal grid using a `sample-and-hold' strategy. We forward-filled values for state-based features (Battery, Screen, Location) up to a sensor-specific horizon determined by the 99th percentile of inter-arrival times. We explicitly marked gaps exceeding this horizon as missing. For accumulative features (e.g., Steps), we uniformly distributed aggregate counts across the reporting intervals.
+
+To preserve data integrity for downstream sequence modeling, we generated a metadata channel (\texttt{data\_info\_flag}) indicating whether each timestep represented a raw observation, an imputed value, or a missing period. This creates a dense representation suitable for the Transformer encoder while retaining the semantic distinction between ``no data'' and ``no change.'' Finally, we normalized continuous features and encoded categorical features for embedding layers. We included an additional feature representing the day of intervention to account for the temporal evolution of user engagement. Table \ref{tab:feature_summary} lists the features used for the analysis and model training.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Summary of passive sensing features and data types.}
+\label{tab:feature_summary}
+\begin{tabular}{@{}l l l@{}}
+\toprule
+\textbf{Category} & \textbf{Continuous Features} & \textbf{Categorical Features} \\ \midrule
+\textbf{Device Status} & \texttt{battery\_level}, \texttt{screen\_flips} & \texttt{batt\_status}, \texttt{batt\_state}, \texttt{scr\_state} \\
+\textbf{Notifications} & \texttt{notif\_rem\_unique}, \texttt{notif\_rem\_tot} & \textit{None} \\
+\textbf{Mobility} & \texttt{steps}, \texttt{loc\_speed}, \texttt{loc\_acc} & \texttt{loc\_context}, \texttt{weekday} \\
+\textbf{Info Flags} & \textit{None} & \texttt{batt/notif/scr/step/loc\_flags} \\ \bottomrule
 \end{tabular}
-  \caption{Summary of datasets.}
-  \label{tab:freq}
 \end{table}
 
-\section{Method}
-\subsection{Data Processing}
-All interventions were built using the MobileCoach a platform, designed to resemble a human-chatbot interaction. The initial message sent by the chatbot is delivered as a notification to the user's screen. We consider this message as the 'initiating message'. If a user is able to reply to this message within 10 minutes, we consider this as an opportune moment, which is consistent with the definitions in prior work \cite{RN15,RN8}. If a user takes longer than 10 minutes to reply, we label the time point when the initiating message was sent as an inopportune moment. However, if a user replied after 10 minutes or more, we labeled the time of the response as an opportune moment. This definition of receptivity was made to be consistent across the different datasets. 
+\subsection{Sample Definition and Cohorts}
+\label{sec:samples}
+We defined a sample as a multi-feature array representing a 24-hour context window, comprising $1,440$ minute-level time steps. To address the scarcity of labeled receptivity data, we adopted a split-source strategy:
 
-Each type of data, including Wi-Fi availability, location, battery level, and others, was individually joined to the record of messages based on the participant identifier and timestamp. To put a time limit on how far back from each message the sensor readings could be taken, we decided to associate the message sending event with data recorded up to 2 days prior. This extended time frame was chosen because certain features only got updated in the sensor readings when they changed, such as physical activity, proximity, and Bluetooth. Rows without mobile data were excluded from the analysis. 
-
-Given the rapid changes in physical activity sensor data readings, which were recorded as percentage confidences for each of the five/six different activities: 'STILL','ON\_FOOT', 'RUNNING', 'IN\_VEHICLE', 'ON\_BICYCLE', 'UNKNOWN', we decided to first, for each time-stamp, retrieve the activity with the highest confidence. Then, to get the definitive activity label for each message, we calculated the activity label that occurs most often in the previous 2 minutes from that message. Similarly, for the phone screen status, we calculated the average of duration during which the phone screen was on the last 2 minutes before the most recent reading.
-
-In the event of missing data, they are dropped, with the exception of 'screen\_num\_on\_found\_5\_min' and 'screen\_num\_off\_found\_5\_min', which are engineered features and are filled with 0s. This results in a lot of data dropping, and a reduction in the number of viable participants and their data. A summary of how many participants with viable data remain are included in Table 2. 
-
-\begin{table}[h]
-\begin{tabular}{l|ll}
-\hline
-Dataset & No. participants \\  \hline
- PEACH-android  & 356\\
-OPTIMAX-android  & 67\\
-ALLY-android  & 26   \\
-PEACH-iOS  & 344 \\
-ALLY-iOS  &  \\
-\hline\hline
-\end{tabular}
-  \caption{Summary of datasets and their number of participants.}
-  \label{tab:freq}
-\end{table}
-
-The distribution of labels (receptive vs non-receptive) for each dataset are given in Table 3. 
-
-\begin{table}[h]
-\begin{tabular}{l|lll}
-\hline
-Dataset & No. of receptive moments & No. of non-receptive moments\\  \hline
- PEACH-android  & 14201 & 5512\\
-OPTIMAX-android  &  1737 &  2183 \\
-ALLY-android  & 705  & 637  \\
-PEACH-iOS  &  9413 & 5779 \\
-ALLY-iOS  & &  \\
-\hline\hline
-\end{tabular}
-  \caption{Summary of datasets and their labels.}
-  \label{tab:freq}
-\end{table}
-
-And example data processing flow for ALLY is shown in Figure~\ref{fig:data-flow-ally}. A similar pathway is taken for the other datasets, OPTIMAX and PEACH as well.  
+\begin{itemize}
+    \item \textbf{Labeled Dataset (Evaluation):} Derived from the LvL UP Main Trial, this set yielded $3,462$ samples from $101$ participants, with individual contributions ranging from $3$ to $96$ samples. We used this strictly for supervised fine-tuning and evaluation.
+    \item \textbf{Unlabeled Dataset (Pre-training):} We used pooled data from the two preliminary studies (Feasibility and Pilot) to create a large-scale corpus for self-supervised learning(SSL). We initially identified $2,447$ potential samples but applied a quality filter retaining only samples with at least $50\%$ valid data (defined as time-steps which are not flagged as `no data` via the metadata channel described in Section \ref{sec:processing}). This criterion excluded $1,531$ sparse instances, resulting in $916$ samples for the self-training phase. We enforced this quality threshold exclusively for the self-supervised phase. Prior work emphasizes that robust representation learning requires sufficient information density to solve the reconstruction objective; if the input is predominantly missing, the effectiveness of the masking task degrades \cite{nie_time_2023, le_ssl-survformer_2025}. To ensure the model learns from valid behavioral signals rather than fitting to noise or missingness artifacts, we prioritized high-quality dense samples to train the encoder. In contrast, labeled receptivity data is scarce. We therefore avoided filtering the evaluation set to maximize the utilization of ground-truth supervision and to ensure our evaluation reflects the realistic sparsity of in-the-wild deployments, relying on the pre-trained features to handle sparse inputs during fine-tuning \cite{kumar_fine-tuning_2022}. Figure \ref{fig:samples-selflearning} illustrates the distribution of these retained samples.
+\end{itemize}
 
 \begin{figure}[h]
-  \centering
-  \includegraphics[width=0.7\linewidth]{figs/ally-data-flow.png}
-  \caption{Data processing flow for ALLY.}
-    \label{fig:data-flow-ally}
-
-\end{figure} 
-
-\subsection{Feature Engineering}
-Besides the data captured by the sensing module, we created several additional features - location type, the number of times the phone was unlocked and the number of times the phone was locked in the last 5 minutes from each initiating message, and the time elapsed in seconds from the last screen unlocking event to the message.  
-To obtain the location type, we used the DBSCAN algorithm to cluster the GPS locations captured \cite{RN24} and categorize them into home, work, transit, and other. We removed points that are not at least accurate up to 100m, and only considered clusters with at least 20 points. We set the maximum distance between two points for one to be considered as in the neighborhood of the other as 100m. We labeled the most frequent location cluster between 10 pm and 6 am every night as home. The most frequent cluster occurring from 10 am to 4 pm every weekday that is not home was labeled as work. All remaining clusters were labeled other while unclustered points were labeled transit.
-
-Regarding the number of times the phone was locked and unlocked in the last 5 minutes, the two features were calculated by summing up the locking and unlocking events in the 5 minutes prior to each initiating message timestamp, starting from the first time-stamp. NaN values were recorded as 0. 
-
-For the light brightness, we also calculated the average light brightness value from the 4 hours prior to each message. This resulted in the light brightness avg from 4h feature. 
-
-Lastly, to calculate the time elapsed from the last screen unlocking and locking event to each message, for each message we found the first unlock and lock event prior to that message,  subtracted the times, and recorded that value in seconds (int).  
-
-For machine learning compatibility, we also converted each message (target)'s timestamp into 3 values: hour (0-23), day of the week (0-6), and the day of that participant's participation in the study (1: first day, 2: second day and so on). 
-
-Furthermore, for each feature, we calculated and included a 'time\_found' feature, which illustrates how much further back in time (in ms) the sensor reading was found. They are all capped at 2 days, however this feature introduces a temporal element to our data that we found to be helpful with our results.  
-
-\subsection{List of features}
-Table~\ref{tab:summary-features} summarizes the full list of features including both engineered features and data directly connected from the phone sensing module that were present in all of the datasets. This is a superset, and for each training and testing pair of datasets, we report the subset of features used in that experiment. Furthermore, we did not particularly perform feature selection but instead tried to use all the data available to us.
-
-\begin{table}[h]
-  \begin{tabular}{ll}
-    \hline
-    \textbf{Feature name} & \textbf{Description} \\
-    \hline
-    1) screen lock &	whether screen is locked, 1 is locked 0 is unlocked \\
-    2) screen unlock & whether screen is unlocked, 1 is unlocked 0 is locked \\
-    3) num off last 5 & number of times the screen was off in the last 5 minutes \\ 
-    4) num on last 5 & number of times the screen was on in the last 5 minutes \\ 
-    5) last unlock to target & time (in seconds) between the last unlocking event and the message \\ 
-    6) battery left & how much battery is left (current battery level) \\
-    7) battery full &	whether the battery is currently full, 1 if full 0 if not \\
-    8) battery discharging &	whether the battery is discharging/ battery level is falling, 1 if discharging, 0 if not \\
-    9) battery charging &	whether the battery is currently charging \\
-    10) on bicycle &	whether the phone owner is on a bicycle speed, 1 if so 0 if not  \\
-    11) on foot &	whether the phone owner is on foot,  1 if so 0 if not\\
-    12) running & whether the phone owner is running,  1 if so 0 if not\\
-    13) in vehicle & whether the phone owner is in a vehicle , 1 if so 0 if not\\
-    14) still &	whether the phone is still, 1 if so 0 if not \\
-    15) tilting * & whether the phone is tilted and how much \\
-    16) shaking ** & whether the phone is shaking and how much\\
-    17) Wi-Fi unavailable &	whether Wi-Fi connection is available/ unavailable, 1 if so 0 if not \\
-    18) home &	is the phone at location identified as home, 1 if so 0 if not\\
-    19) work &	is the phone at location identified as work, 1 if so 0 if not\\
-    20) transit & is the phone at a location identified as transit,  1 if so 0 if not \\
-    21) unknown &	is the phone location unknown, 1 if so 0 if not \\
-    22) Other &	is the phone in a location identified as other, 1 if so 0 if not\\
-    23) hour &	hour of the day (0-23) \\
-    24) day &	day of the week (0-6, 0 being Monday) \\
-    25) day of study & the day of the participants participating in the study (1: first day, 2: second day, ...) \\
-    26) light brightness & brightness of phone screen \\
-    27) screen found on \\
-    28) last lock to target & time (in seconds) between the last locking  event and the message \\ 
-    29) light brightness average from 4 hours & average brightness from last 4 hours \\
-    30) unknown activity & whether the activity of user is unknown \\ 
-    31) maxrange \\ 
-    32) battery voltage \\
-    33) battery temperature \\
-    34) number of wifi devices \\
-    35) number of bluetooth devices \\
-    \hline
-\end{tabular}
-  \caption{Table of feature names and descriptions. *indicates presence only in android, ** indicates presence only in iOS. Comparable features, so taken to be similar.}
-  \label{tab:summary-features}
-\end{table}
-
-\begin{table}[h]
-  \begin{tabular}{ll}
-    \hline
-    \textbf{Train/test pair \color{blue}{@SAMARTH CHECK THIS}}\color{black} & \textbf{Features} \\
-    \hline
-    Peach iOS/Peach iOS & 14, 2, 24, 28, 25, 5, 6, 16, 4, 10, 12, battery from found 10 mins drain ??,  \\ &23, 3, 1, 26, 13, 29, 11
-     \\ 
-     Peach Android/Peach iOS  & battery from found 10 mins drain, 23, 24, 2, 25, 28,3,1, 5, 26, 6,29,4 \\
-     Peach Android/Peach Android & 2, 24,30, 31, 12, 5, 28, 32, 6, 4, 14, 29, 33, 7, 34, 10, 25, 11, 16, \\ &proximity found distance , 17, battery from found 10 min drain, \\ & 35, 31, 8, 23, 9, 4, 15, 1, 26, 29, 13 \\ 
-     Peach iOS/Ally Android & battery from found 10 min drain, 23, 24, 2,25, 24, 28, 4, 1, 6, 5, 3 \\
-     Optimax Android/Peach iOS & battery from found 10 min drain, 23, 24, 2, 25, 28, 1, 5, 26, 6, 29, 4\\
-     Optimax Android/Peach Android & 2, 24, 30, 31, 12, 28, 32 \\
-    \hline
-\end{tabular}
-  \caption{Table of features used for each experiment. The numbers refer to indices in Table 4.}
-  \label{tab:summary-features}
-\end{table}
-
-\subsection{Models}
-Given the differences in data collected from iOS and Android devices, we built separate models for them \cite{RN15}. Furthermore, we examined the performance for models trained on one dataset and tested on another, within and across platforms. We also experimented with giving various ways and amounts of test dataset data as part of the training set, to improve generalizability. We examined five machine learning approaches: 1) Gradient Boosted Trees, 2) Random Forest 3) a Neural Net (MLP) 4) SVM and 5) KNN. For all five, we conducted grid search with several different parameters to find the best ones, which are recorded here. Only the MLP and gradient boosted trees were used for transfer learning. MLPs had two varieties which we considered, MLP1 and MLP2, and we examined the area under the receiver operating curve (AUROC) to characterize how well each model performed when evaluated with different test sets. 
-
-\subsubsection{Gradient Boost Decision Trees}
-Boosted tree algorithms are relatively fast to train and have been shown to outperform other approaches such as deep learning and simple linear models in supervised learning tasks for a number of tabular data sets \cite{RN24}. We used the scikit-learn implementation with parameters n\_estimators=50, learning\_rate=0.1, max\_depth=5, random\_state=42. All other parameters were left as their default settings.
-
-\subsubsection{Random Forest}
-Due to success with AUROC and efficiency, we chose a Random Forest classifier with n-estimators equal to 100 to train and test our data. 
-
-\subsubsection{SVM}\color{blue}{@SAMARTH}\color{black} 
-\subsubsection{KNN}\color{blue}{@SAMARTH}\color{black} 
-
-\subsubsection{Neural Net}
-Neural networks can learn nonlinear features and are also adaptable to reinforcement learning approaches on a continuous state space (such as the continuous range of battery level, screen brightness, etc.). However, they are slow to train and require a large volume of training data. For our neural network, we experimented with an MLP auto encoder(insert architecture), and used various train/test data hybridization techniques to perform transfer learning between datasets of different features and sizes. The parameters of the neural network were: {\color{blue}\textbf{insert}}, and our hybridization techniques are explained in the section below. 
-
-% \begin{figure}[h]
-%   \centering
-%   \includegraphics[width=0.5\linewidth]{fig11}
-%   \caption{Neural network model architecture.}
-%     \label{fig:neuralnet-architecture}
-% \end{figure}
-
-\subsection{Self techniques}
-For training and testing on the same dataset, we used leave one subject out (LOSO) evaluation, where one subject in the dataset was held as the test set, and the rest were concatenated and used as training set. Prior to training, we also performed feature scaling for numeric (not one hot) features for both train and test by normalizing so that the mean is zero and standard deviation is one. This evaluation gave us results listed in Tables 6,7and 8.    
+    \centering
+    \includegraphics[width=0.6\linewidth]{figs/img-samples-selflearning.png}
+    \caption{Distribution of retained samples for self-supervised learning (density $\ge 0.5$).}
+    \label{fig:samples-selflearning}
+\end{figure}
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Results} % (fold)
+\section{Methodology}
+\label{sec:methodology}
+
+\subsection{Experimental Setup}
+We evaluated the PRISM framework using a 24-hour historical context window ($L=1440$ minutes) to predict user receptivity. We employed a 5-fold Group K-Cross Validation strategy to ensure robustness. All data from a single participant remained strictly within a single fold (either train or test) to prevent data leakage and to measure generalization to unseen users. We maintained a consistent encoder-only backbone across all models ($L=1440$, patch length $P=16$, stride $S=8$). The transformer depth consisted of 3 layers with a model dimension of $D=64$ and 4 attention heads. We optimized the objective defined in Section \ref{sec:inference}, adapting the DeepHit loss with a ranking penalty for numerical stability ($\alpha=0.5$).
+
+\subsection{Target Definition and Evaluation Metrics}
+\label{sec:targets}
+We framed the prediction task as discrete-time survival analysis with administrative truncation. We defined an actionable horizon of 180 minutes post-notification, discretizing this interval $[0, 180]$ into $K=24$ bins. Unlike clinical trials with random censoring, we assume an eventual response; we mapped valid responses to their respective bins and assigned outliers (responses $>180$ minutes or missing) to the final time bin ($K$). This approach avoids unbounded regression targets while categorizing late responses as effectively `non-receptive.'
+
+Since PRISM outputs a probability distribution (Time-to-Event) while baselines output binary predictions, we projected the probabilistic output into the binary classification space for fair comparison. For a given instance $i$, PRISM predicts the cumulative distribution function $\hat{F}_i(t) = P(T \le t)$. We extracted the predicted probability of response within the target horizon $\tau=15$ minutes:
+\begin{equation}
+    \hat{y}_{prism} = \hat{F}_i(\tau)
+\end{equation}
+We treated this value as the positive class probability, allowing us to compute standard metrics (AUC, F1-score) across all models regardless of their original output format.
+
+\subsection{Baselines and Ablations}
+To assess the value of our temporal modeling approach, we compared PRISM against a gradient-boosted decision tree (XGBoost) trained on static ``snapshot'' features. This baseline represents the standard JITAI approach where decisions rely on the user state observed at the intervention time without explicit sequence modeling. The model accepted a tabular vector of the last known values for all context features (e.g., battery level, step count, location) at the moment of intervention and performed a binary classification of receptivity (whether the user responds within $\tau=15$ minutes).
+
+We further investigate the architectural contribution by evaluating \textbf{PRISM w/o SSL}. This ablation isolates the benefits of the pre-training strategy. The model utilizes the identical backbone but is initialized randomly and trained via supervised learning. This comparison isolates the impact of self-supervised representation learning from the sequence modeling capability of the transformer architecture.
+
+\subsection{Training Protocols}
+\subsubsection{Supervised Training Strategy}
+For the \textbf{PRISM w/o SSL} ablation, we trained the model for a maximum of 50 epochs with early stopping (patience of 15 epochs). Optimization used AdamW with a global weight decay of $1\mathrm{e}{-3}$. We employed Layer-wise Learning Rate Decay (LLRD) to train the deep transformer on the limited labeled data. We assigned a lower learning rate to the backbone ($\eta_{\text{backbone}} = 2\mathrm{e}{-5}$) to preserve stability, while the survival head ($256$ units, ReLU, Dropout $0.2$) updated rapidly ($\eta_{\text{head}} = 1\mathrm{e}{-3}$). A `ReduceLROnPlateau' scheduler (factor 0.5, patience 5) managed the learning rate adjustments.
+
+\subsubsection{Self-Supervised Pre-training}
+The full \textbf{PRISM} framework incorporates a Self-Supervised Learning (SSL) pre-training phase. This phase leverages a large-scale unlabeled dataset comprising diverse behavioral patterns from participant history not associated with receptivity labels. During the first phase (Pre-training), the backbone utilized a Masked Auto-Encoding (MAE) objective. We randomly masked 40\% of the input patches and minimized the Mean Squared Error (MSE) of the reconstruction. This phase ran for 50 epochs using an AdamW optimizer ($\eta=1\mathrm{e}{-3}$) coupled with a Cosine Annealing scheduler ($\eta_{\text{min}}=1\mathrm{e}{-5}$).
+
+In the second phase (Fine-Tuning), we transferred the pre-trained weights to the supervised task. We increased the regularization in the head (Dropout increased to $0.25$) to prevent overfitting to the smaller labeled set. The fine-tuning process mirrored the supervised baseline: 50 epochs, early stopping (patience 15), and the LLRD configuration ($\eta_{\text{backbone}} = 2\mathrm{e}{-5}$, $\eta_{\text{head}} = 1\mathrm{e}{-3}$) to adapt the learned representations to the receptivity task.
+
+\subsubsection{Linear Probing and Fine-Tuning (LP-FT)}
+We implemented the \textbf{LP-FT} (Linear Probing then Fine-Tuning) protocol to address potential distortion of pre-trained features during the initial fine-tuning phase\cite{kumar_fine-tuning_2022}. This training occurred in two stages. In Stage 1 (Linear Probing), we froze the transformer backbone, allowing gradients to flow only to the randomly initialized survival head, embeddings, and normalization layers. We trained for 20 epochs with a learning rate of $1\mathrm{e}{-3}$ for all active parameters. This aligns the head with the pre-trained features before the features shift. In Stage 2 (Full Fine-Tuning), we unfroze the backbone and proceeded with full fine-tuning for an additional 30 epochs. We re-introduced LLRD ($\eta_{\text{backbone}} = 2\mathrm{e}{-5}$, $\eta_{\text{head}} = 1\mathrm{e}{-3}$) to fine-tune the entire network. This protocol serves as an experimental upper bound, trading increased training complexity for stability.
+
+
+
+
+\section{Results}
 \seclabel{results}
+% Not adding RQ's right now as its cooked for now 
 
-Compare and contrast this paper's work with important papers from the literature.
-Always use a tilde (non-breaking space) before the `cite' command~\cite{lamport:latex94}, to avoid unfortunate line breaks.
-Use our `bibtex' annotation when you can't remember the cite key, or still need to find a reference~\bibtex{fubar}.
-Later replace it with the `cite' command once you have the right cite key.
+\subsection{Model Fidelity \& Interpretation}
+
+We visualize the model's native output in Figure \ref{fig:single-participant} (Left) to demonstrate the granularity of the learned representations. Unlike standard receptivity classifiers that output a single binary decision, PRISM generates a full probability mass function (PMF) over the actionable 180-minute horizon. The y-axis represents the probability of a receptive state occurring within a specific time bin, following a notification. In this plot, we average the distributions across the Early, Mid, and Late phases of the intervention for a single participant to illustrate longitudinal behavioral shifts.
+
+The distinct morphologies of these curves highlight the model's ability to capture latent dynamics. For this participant, the Mid phase (Day 22-37) is characterized by a sharp peak within the first 30 minutes, indicating a higher probability of rapid engagement compared to other phases. Conversely, the Late phase exhibits a pronounced density increase in the final time bin (160--180 mins). This divergence in the model's learned representation provides a quantitative lens to investigate phenomena such as `prompt fatigue,' suggesting a state where the user's intent to respond persists but latency increases. Rather than treating these late responses as simple failures, the model learns to adjust the shape of urgency based on the intervention phase, allowing for a deeper inspection of user compliance that binary metrics obscure.
+
+Figure \ref{fig:training-dynamics} (Right) illustrates the training dynamics, providing insight into the stability offered by Self-Supervised Learning (SSL). We report two metrics: \textit{Ranking Loss}, which measures the model's ability to correctly order risk times (e.g., ensuring a 10-minute response is ranked higher than a 60-minute response), and \textit{Entropy}, which quantifies the uncertainty of the predicted distribution. The shaded regions denote the standard deviation across the 5 cross-validation folds.
+
+First, regarding \textbf{Entropy}, PRISM (initialized with SSL) starts with higher entropy compared to the version trained from scratch (PRISM w/o SSL). This indicates that the pre-trained backbone initializes the model with a broader prior, allowing it to explore the probability space before narrowing down to a confident prediction. In terms of \textbf{Ranking Loss}, the SSL-initialized model demonstrates a smoother descent and tighter error bounds (smaller shaded area) compared to the baseline. This suggests that while both models learn to discriminate, the self-supervised initialization provides a more stable optimization landscape, reducing variance across different data folds and preventing the model from collapsing into local minima.
+
+Collectively, these qualitative and quantitative insights answer \textbf{RQ1}. By architecting a framework that couples a Channel-Independent Transformer with a probabilistic survival decoder, we demonstrate the feasibility of modeling receptivity not as a static binary outcome, but as a continuous, time-to-event distribution.
+
+\begin{figure*}[h]
+    \centering
+    % Left Image: 74% width container
+    \begin{minipage}{0.55\textwidth}
+        \centering
+        % "keepaspectratio" ensures it doesn't distort. 
+        % It will fill the height of 6cm, or the width of the box, whichever comes first.
+        \includegraphics[height=6cm, width=\linewidth, keepaspectratio]{figs/img-single-participant.png}
+        \caption{Single-participant receptivity forecast (24 hours of historic time steps as input). The model predicts a density over the subsequent 180-minute window, averaged across all instances of the participant for a given intervention phase.}
+        \label{fig:single-participant}
+    \end{minipage}%
+    \hfill
+    % Right Image: 24% width container
+    \begin{minipage}{0.40\textwidth}
+        \centering
+        % Setting the EXACT SAME height (6cm) here matches them up.
+        \includegraphics[height=6cm, width=\linewidth, keepaspectratio]{figs/img-training-dynamics.png}
+        \caption{Training dynamics comparison. Metrics shown are Ranking Loss (Bottom) and Entropy (Top) with shaded regions indicating standard deviation across folds.}
+        \label{fig:training-dynamics}
+    \end{minipage}
+\end{figure*}
+
+
+\subsection{Comparative Performance Analysis}
+
+We compare the performance of our proposed framework against a static baseline, an ablation study (PRISM w/o SSL), and an optimized variant (PRISM w/ LP-FT). Table \ref{tab:auc_performance_metrics} summarizes the results.
+
+First, we find that the deep temporal architecture trained from scratch (\textbf{PRISM w/o SSL}) achieves a median AUC of 0.6469, which is comparable to the gradient-boosting baseline (\textbf{XGB}, 0.6413). Notably, this baseline is explicitly trained to optimize the fixed-window binary operationalization of receptivity, whereas PRISM is trained to model the full time-to-event distribution. That PRISM w/o SSL achieves on-par performance in this setting demonstrates the flexibility of the proposed formulation: even without being optimized for a specific binary cutoff, the distributional model can adapt to task-specific evaluation objectives and recover competitive decision boundaries.
+
+This result indicates that the survival-based framework does not sacrifice performance when projected onto traditional fixed-time classification goals, while simultaneously retaining the capacity to support richer temporal reasoning. In other words, modeling receptivity as a time-to-event process provides a general-purpose representation that can be specialized to binary, threshold-based tasks when needed, rather than being intrinsically tied to a particular operationalization.
+
+Building on this foundation, the full \textbf{PRISM} framework initialized via Self-Supervised Learning on unlabeled sensor traces achieves a median AUC of 0.7099, representing a substantial 10.70\% improvement over the baseline. Referring to Figure \ref{fig:training-dynamics}, we observe that while the model trained from scratch (\textbf{PRISM w/o SSL}) reaches lower final entropy and ranking loss values, this sharp convergence does not translate to improved utilization of the test set. In contrast, the SSL-initialized model maintains higher entropy but achieves superior validation performance. This suggests that pre-training acts as a strong regularizer: SSL offers robust representations of habitual behavior derived from unlabeled data, allowing the model to avoid memorizing noise and resulting in learned features that are transferable to unseen users.
+
+Additionally, we find that further performance improvements can be made on the existing PRISM framework through optimization. The \textbf{PRISM w/ LP-FT} variant, which stabilizes the transfer process via linear probing, reaches a median AUC of 0.7405 (+15.47\%). This optimization step acts as a final tuning of the representations learned during the self-supervised phase, confirming that the PRISM backbone provides a sturdy foundation for maximizing predictive performance.
+
+These results directly address \textbf{RQ2}. By consistently outperforming the gradient-boosting baseline and demonstrating tighter error bounds across folds (Table \ref{tab:auc_performance_metrics}), PRISM proves to be a robust alternative to binary operationalizations. The framework's ability to maintain predictive stability, even when projected onto standard classification metrics, confirms that our proposed distributional approach offers a reliable engine for real-world deployment.
+
+\begin{table}[h]
+\centering
+\caption{Performance Benchmark: Median AUC and Dispersion (MAD) across 5-fold cross-validation}
+\label{tab:auc_performance_metrics}
+\begin{tabular}{@{}l c c c c@{}}
+\toprule
+\textbf{Metric} & \textbf{XGB (Baseline)} & \textbf{PRISM w/o SSL} & \textbf{PRISM} & \textbf{PRISM w/ LP-FT} \\ \midrule
+Median AUC & 0.6413 & 0.6469 & 0.7099 & 0.7405 \\
+Dispersion (MAD) & -- & $\pm$0.0553 & $\pm$0.0218 & $\pm$0.0053 \\
+Improvement (\%) & -- & +0.87\% & +10.70\% & +15.47\% \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Label Efficiency Analysis}
+
+To investigate the practical deployment viability of our framework, we conducted a sensitivity analysis by training the models on progressively reduced subsets of the \textit{labeled} participant pool (10\%, 30\%, 50\%, 70\%, 80\%, 100\%). In this setup, the XGBoost baseline is limited strictly to the reduced labeled set, whereas PRISM benefits from the self-supervised reconstruction task on the underlying sensor features before fine-tuning on the available labels. Evaluating this trade-off is critical for real-world mHealth applications, where collecting high-quality labels is burdensome and expensive, while passive sensing data is readily available. To ensure a rigorous evaluation, the test set remained fixed across all experimental conditions, serving as a consistent benchmark. Figure \ref{fig:data-efficiency} compares the median AUC of PRISM against the XGBoost baseline. 
+
+We observe that \textbf{PRISM} consistently outperforms the strong gradient-boosting baseline across all data fractions. Notably, even with only 10\% of the training participants available, the self-supervised model maintains competitive performance, offering a practical solution to the `cold-start' problem common in mHealth deployments. This resilience highlights the efficacy of the masked reconstruction objective; by forcing the model to infer missing sensor patches from context, pre-training equips the encoder with a generalized understanding of behavioral dynamics that transfers efficiently to the downstream receptivity task.
+
+These findings provide a substantive answer to \textbf{RQ3}. The model's ability to retain predictive power in data-sparse regimes confirms that learning generalizable representations from passive sensing data is a viable strategy for overcoming the label scarcity bottleneck. By reducing the dependence on extensive participant history, PRISM demonstrates that sophisticated deep learning architectures can be effectively adapted to the constraints of real-world intervention delivery.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\linewidth]{figs/img-dataefficiency.png}
+    \caption{Model performance (Median AUC) evaluated across varying training set fractions (10\%--100\%) with a fixed test set, with shaded regions indicating standard deviation across folds}
+    \label{fig:data-efficiency}
+\end{figure}
+
+\subsection{Looking deeper into PRISM}
+While the primary research questions (RQ1--RQ3) have been addressed, demonstrating the feasibility, robustness, and efficiency of our approach, we conduct a deeper examination of the PRISM architecture's internal mechanisms.
+\subsubsection{Ablation Study: Impact of Layer-wise Learning Rate Decay}
+\label{sec:ablation_llrd}
+
+Integrating a pre-trained time-series backbone into a downstream task typically presents a stability-plasticity dilemma. A high learning rate facilitates rapid adaptation of the randomly initialized survival head (plasticity) but risks destroying the pre-trained feature representations (catastrophic forgetting). Conversely, a low learning rate preserves the backbone (stability) but may fail to align the head sufficiently for the receptive task (negative transfer).
+
+We addressed this by implementing Layer-wise Learning Rate Decay (LLRD). In our experiments, we assigned a high learning rate ($\eta_{\text{head}} = 1\mathrm{e}{-3}$) to the survival head and a significantly lower rate ($\eta_{\text{backbone}} = 2\mathrm{e}{-5}$) to the backbone.
+
+Figure \ref{fig:llrd_gradients} reveals a differential learning dynamic: the head exhibits high-magnitude updates, learning aggressively, while the backbone gradients remain orders of magnitude smaller, indicating stable feature preservation. Figure \ref{fig:llrd_performance} demonstrates the consequence of this mechanism on the validation performance. Without LLRD (dashed red line), the model suffers an immediate performance collapse upon unfreezing the backbone, failing to recover. In contrast, the LLRD-enabled model (solid blue line) transitions smoothly from the frozen phase, continuously improving AUC without degradation. 
+
+These results indicate that careful control of gradient flow is critical for preserving the transferable temporal representations learned during self-supervised pre-training. More broadly, they demonstrate that PRISM can be reliably adapted to new receptivity datasets without extensive manual tuning, supporting its practical use in longitudinal deployments where models must be periodically updated as new data become available.
+
+
+\begin{figure*}[h]
+    \centering
+    % Left Image: Gradient Dynamics
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[height=6cm, width=\linewidth, keepaspectratio]{figs/img-ablation-llrd-gradients.png}
+        \caption{Differential Learning Dynamics. Gradient logs show the survival head learning $\sim$30x faster than the backbone, balancing plasticity and stability.}
+        \label{fig:llrd_gradients}
+    \end{minipage}%
+    \hfill
+    % Right Image: Performance Comparison
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[height=6cm, width=\linewidth, keepaspectratio]{figs/img-ablation-llrd-performance.png}
+        \caption{Impact on Transfer Performance. Validation AUC confirms that LLRD prevents the catastrophic forgetting observed in the naive fine-tuning baseline.}
+        \label{fig:llrd_performance}
+    \end{minipage}
+\end{figure*}
+
+
+\subsubsection{Input Context Window \& Feature Reliance}
+\label{sec:context_ablation}
+
+To understand the temporal dependencies of receptivity, we evaluated PRISM on a shorter 3-hour input context window (180 timesteps) versus the standard 24-hour window (1440 timesteps) as reported above.
+The reduction in context showed similar performance in the receptivity within 15 minutes metric. The 3-hour model achieved an AUC of \textbf{0.7159}, comparable to the 24-hour model's \textbf{0.7099}. While the predictive performance remained consistent, an analysis of Permutation Feature Importance (PFI) reveals both distinct commonalities and key divergences in the prediction mechanism (Figure \ref{fig:pfi_comparison}).
+
+Consistent with prior mobile sensing literature \cite{mishra_detecting_2021,keller_receptivity_2023,Pielot2017}, \textbf{Battery Status} and \textbf{Location Context} emerge as dominant predictors across both time horizons (Figure \ref{fig:pfi_comparison}). This consistency aligns with the historical view that device state and semantic location are fundamental constraints on receptivity. However, the models diverge in their utilization of high-frequency signals. In the 3-hour model, features related to immediate interaction, such as \texttt{notif\_data\_removed\_total}, appear to play a more central role. This sensor tracks the volume of notification dismissals per timestep, effectively serving as a high-resolution proxy for active phone engagement. The elevated importance of such interaction markers in the short-context model highlights an adaptation to \textit{knowledge availability}. By restricting the input window, we effectively `blind' the model to long-term temporal dependencies, forcing it to compensate by capitalizing on immediate dynamic states. Conversely, the 24-hour model, possessing the broader historical context, can leverage features that capture routine stability. Thus, the PFI shift reflects the model's distinct strategies for extracting signal from the available information horizon.
+
+From a practical perspective, this suggests that the framework offers a configurable trade-off between conceptual depth and computational cost. Rather than enforcing a single rigid architecture, the approach enables designers to align the modeling horizon with their specific system constraints, favoring short-context efficiency or long-context robustness as the deployment environment requires.
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figs/img-pfi-comparision.png}
+    \caption{Permutation Feature Importance (PFI) comparison between 3h and 24h context windows.}
+    \label{fig:pfi_comparison}
+\end{figure}
+
+
+
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion} 
 \seclabel{discussion}
+%% Add a summary of results. 
+\subsection{Implications}
 
-\seclabel{limitations}
-- We can only say that our models work for our operationalization of receptivity. May not necessarily work for other ways to measure receptivity. 
-- 
+The transition from binary classification to a time-to-event framework carries significant theoretical implications for how we operationalize receptivity. By leveraging a Probability Mass Function (PMF) rather than a static decision, the architecture improves the transparency and debuggability of the model, allowing researchers to inspect the `shape' of user urgency. As illustrated in Figure \ref{fig:single-participant}, this granular view reveals behavioral dynamics that are typically obfuscated by scalar metrics. For instance, we observed a distinct morphological shift in probability distributions between the early, mid and late phases of the intervention. This visual evidence quantitatively captures the phenomenon of `prompt fatigue,' where the user's intent to respond persists, but the latency increases. Such insights transform receptivity from a black-box prediction into an interpretable behavioral metric, enabling a deeper understanding of how intervention fatigue manifests over longitudinal deployments.
 
+From a methodological perspective, the integration of SSL has major implications for the robustness and data efficiency of mHealth modeling. Our results demonstrate that the "cold start" problem can be effectively mitigated by decoupling representation learning from task-specific discrimination. By pre-training on unlabeled sensor traces, the model acts as a stabilizer, learning robust representations of habitual behavior before encountering scarce receptivity labels. This suggests that future mHealth frameworks need not rely exclusively on expensive, high-burden labeled datasets. Instead, they can leverage the abundance of passive, unlabeled sensor data to build robust feature extractors that generalize better on unseen populations.
+
+Practically, this framework prompts a rethinking of how JITAIs operationalize receptivity in real-world systems. Traditional receptivity modules operate on a "poll-and-trigger" logic, where the system continuously queries a binary classifier (e.g., every 10 minutes) until a positive prediction triggers a notification. This reactive loop is computationally expensive and prone to false positives. The proposed survival analysis framework enables a shift towards proactive intervention scheduling. Because the model outputs a density function over a future horizon (e.g., the next 3 hours), an intervention designer can identify the point of maximum probability in a single inference step. This allows for sophisticated delivery logic, such as scheduling a notification for a specific future timestamp when the user is most likely to be available, or implementing "soft" retries based on the cumulative distribution function, thereby reducing the computational frequency of inference while maximizing engagement rates.
+
+Finally, the architectural choices underlying this framework offer high reusability for the broader Ubiquitous Computing and HCI communities. The data footprint is not unique to receptivity; it is intrinsic to numerous predictive tasks. The utilization of the PatchTST backbone ensures that this capability remains computationally efficient, as the channel-independent attention mechanism scales linearly rather than quadratically. Consequently, this architecture provides a transferable template for modeling other such context-dependent latency in mobile sensing. 
+
+\subsection{Limitations and Future Work}
+While the proposed \texttt{PRISM} framework utilizes an architecture capable of modeling multiple competing events, our current evaluation focuses on a single event horizon: receptivity within a fixed window. We adopted this binary threshold to maintain comparability with existing baselines in the JITAI literature. 
+
+A central motivation for adopting a survival-based framework is its inherent capacity to handle \textit{competing risks}. In real-world deployment, non-response is not a monolithic state; there is a significant semantic distinction between a user who actively dismisses a notification (indicating unavailability or burden) and one who simply misses it (indicating a lack of attention). Furthermore, our evaluation utilized data from a protocol with a fixed morning intervention schedule (09:00). While this design choice was intentional to control for circadian confounding and isolate the efficacy of the proposed conceptual shift, it inherently limits our analysis to morning receptivity dynamics. Validation in future work requires testing across diverse intervention windows (e.g., afternoon, evening). While there remains a considerable gap in response observations across the full day, the framework's capacity to learn granular temporal dependencies in this setting suggests it is well-equipped to generalize to dynamic intervention schedules.
+
+Additionally, we acknowledge that our discrete-time approach still imposes a temporal boundary via the 180-minute `actionable horizon.' While we critique the rigidity of standard 10-minute binary windows, our model is similarly bounded by this architectural choice. However, the distinction lies in the resolution: unlike binary classification, which collapses the timeline into a single label, our framework provides continuous density estimations \textit{within} this horizon. This allows for flexible, post-hoc thresholding, though future work could explore continuous-time formulations to eliminate fixed horizons entirely.
+
+Finally, we must address the geographic constraints of our dataset. Although our self-supervised pre-training leveraged unlabeled data from distinct study cohorts, all data collection occurred within Singapore. Consequently, the learned behavioral representations may inherently encode local environmental biases, such as specific urban mobility patterns or tropical weather baselines. While the model demonstrates robustness across different user groups, validating the transferability of these pre-trained ``behavioral grammars'' to diverse cultural and geographic settings remains a critical direction for future research.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion} 
 \seclabel{conclusion}
+In this work, we propose PRISM, a framework that models receptivity as a probabilistic time-to-event distribution derived from longitudinal mobile sensing data. We validated its effectiveness on existing receptivity benchmarks, where it demonstrated superior predictive fidelity and resilience in limited-label regimes. Beyond performance metrics, PRISM offers a robust and explainable pathway for modeling receptivity: through its self-supervised backbone, it effectively leverages unlabeled passive sensing data to address cold-start challenges, while its probabilistic output offers an expandable framework that better aligns with the continuous dynamics of user behavior. However, challenges remain, and future research should focus on validating transferability across diverse populations and exploring varied intervention delivery mechanisms. PRISM helps bridge the gap between static classification and granular behavioral modeling, paving the way for the next generation of proactive Just-in-Time Adaptive Interventions.
 
-Alternately, this section may be titled `Summary', if its primary content is to summarize the paper. 
-\hey{Strictly speaking, a `Conclusion' section should only state conclusions.}
-Sometimes this section may also contain suggestions for Future Work.
